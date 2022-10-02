@@ -21,9 +21,9 @@ import Xliff from "../src/Xliff.js";
 import TranslationUnit from "../src/TranslationUnit.js";
 
 function diff(a, b) {
-    var min = Math.min(a.length, b.length);
+    let min = Math.min(a.length, b.length);
 
-    for (var i = 0; i < min; i++) {
+    for (let i = 0; i < min; i++) {
         if (a[i] !== b[i]) {
             console.log("Found difference at character " + i);
             console.log("a: " + a.substring(i));
@@ -77,13 +77,50 @@ export const testXliff10 = {
         test.done();
     },
 
+    testXliffGetVersionDefault: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+        
+        test.equal(x.getVersion(), "1.2");
+
+        test.done();
+    },
+
+    testXliffGetVersion12: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({
+            version: "1.2"
+        });
+        test.ok(x);
+        
+        test.equal(x.getVersion(), "1.2");
+
+        test.done();
+    },
+
+    testXliffGetVersion20: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({
+            version: "2.0"
+        });
+        test.ok(x);
+        
+        test.equal(x.getVersion(), "2.0");
+
+        test.done();
+    },
+
     testXliffAddTranslationUnit: function(test) {
         test.expect(11);
 
         const x = new Xliff();
         test.ok(x);
 
-        var tu = new TranslationUnit({
+        let tu = new TranslationUnit({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -97,7 +134,7 @@ export const testXliff10 = {
 
         x.addTranslationUnit(tu);
 
-        var tulist = x.getTranslationUnits();
+        const tulist = x.getTranslationUnits();
 
         test.ok(tulist);
 
@@ -114,6 +151,344 @@ export const testXliff10 = {
         test.done();
     },
 
+    testXliffAddTranslationUnitMultiple: function(test) {
+        test.expect(19);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        let tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java"
+        });
+
+        x.addTranslationUnit(tu);
+
+        tu = new TranslationUnit({
+            source: "foobar",
+            sourceLocale: "en-US",
+            key: "asdf",
+            file: "x.java",
+            project: "webapp",
+            resType: "array",
+            state: "translated",
+            comment: "No comment",
+            datatype: "javascript"
+        });
+
+        x.addTranslationUnit(tu);
+
+        const tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 2);
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].state, "new");
+        test.equal(tulist[0].comment, "This is a comment");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].datatype, "java");
+
+        test.equal(tulist[1].source, "foobar");
+        test.equal(tulist[1].sourceLocale, "en-US");
+        test.equal(tulist[1].key, "asdf");
+        test.equal(tulist[1].file, "x.java");
+        test.equal(tulist[1].state, "translated");
+        test.equal(tulist[1].comment, "No comment");
+        test.equal(tulist[1].project, "webapp");
+        test.equal(tulist[1].datatype, "javascript");
+
+        test.done();
+    },
+
+    testXliffAddTranslationUnitAddSameTUTwice: function(test) {
+        test.expect(11);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        let tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java"
+        });
+
+        x.addTranslationUnit(tu);
+        x.addTranslationUnit(tu); // second time should not add anything
+
+        const tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].state, "new");
+        test.equal(tulist[0].comment, "This is a comment");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].datatype, "java");
+
+        test.done();
+    },
+
+    testXliffAddTranslationUnits: function(test) {
+        test.expect(19);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        
+        x.addTranslationUnits([
+            new TranslationUnit({
+                source: "Asdf asdf",
+                sourceLocale: "en-US",
+                key: "foobar",
+                file: "foo/bar/asdf.java",
+                project: "webapp",
+                resType: "string",
+                state: "new",
+                comment: "This is a comment",
+                datatype: "java"
+            }),
+            new TranslationUnit({
+                source: "foobar",
+                sourceLocale: "en-US",
+                key: "asdf",
+                file: "x.java",
+                project: "webapp",
+                resType: "array",
+                state: "translated",
+                comment: "No comment",
+                datatype: "javascript"
+            })
+        ]);
+
+        const tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 2);
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].state, "new");
+        test.equal(tulist[0].comment, "This is a comment");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].datatype, "java");
+
+        test.equal(tulist[1].source, "foobar");
+        test.equal(tulist[1].sourceLocale, "en-US");
+        test.equal(tulist[1].key, "asdf");
+        test.equal(tulist[1].file, "x.java");
+        test.equal(tulist[1].state, "translated");
+        test.equal(tulist[1].comment, "No comment");
+        test.equal(tulist[1].project, "webapp");
+        test.equal(tulist[1].datatype, "javascript");
+
+        test.done();
+    },
+
+    testXliffSize: function(test) {
+        test.expect(3);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        test.equal(x.size(), 0);
+
+        x.addTranslationUnits([
+            new TranslationUnit({
+                source: "Asdf asdf",
+                sourceLocale: "en-US",
+                key: "foobar",
+                file: "foo/bar/asdf.java",
+                project: "webapp",
+                resType: "string",
+                state: "new",
+                comment: "This is a comment",
+                datatype: "java"
+            }),
+            new TranslationUnit({
+                source: "foobar",
+                sourceLocale: "en-US",
+                key: "asdf",
+                file: "x.java",
+                project: "webapp",
+                resType: "array",
+                state: "translated",
+                comment: "No comment",
+                datatype: "javascript"
+            })
+        ]);
+
+        test.equal(x.size(), 2);
+
+        test.done();
+    },
+
+    testXliffSerializeSourceOnly: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java"
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="foo/bar/asdf.java" source-language="en-US" product-name="webapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="1" resname="foobar" restype="string" datatype="java">\n' +
+            '        <source>Asdf asdf</source>\n' +
+            '        <note>This is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
+    testXliffSerializeFull: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java"
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="1" resname="foobar" restype="string" datatype="java">\n' +
+            '        <source>Asdf asdf</source>\n' +
+            '        <target state="new">bam bam</target>\n' +
+            '        <note>This is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
+    testXliffSerializeWithSourceAndTargetAndComment: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        let tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "foobarfoo",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            comment: "foobar is where it's at!"
+        });
+
+        x.addTranslationUnit(tu);
+
+        tu = new TranslationUnit({
+            source: "baby baby",
+            sourceLocale: "en-US",
+            target: "bebe bebe",
+            targetLocale: "fr-FR",
+            key: "huzzah",
+            file: "foo/bar/j.java",
+            project: "webapp",
+            comment: "come & enjoy it with us"
+        });
+
+        x.addTranslationUnit(tu);
+
+        let expected =
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="1" resname="foobar" restype="string">\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '        <note>foobar is where it\'s at!</note>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="fr-FR" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source>baby baby</source>\n' +
+                '        <target>bebe bebe</target>\n' +
+                '        <note>come &amp; enjoy it with us</note>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>';
+
+        let actual = x.serialize();
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+
+        test.done();
+    },
+
 /*
     testXliffSize: function(test) {
         test.expect(3);
@@ -121,7 +496,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -148,7 +523,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -168,7 +543,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var reslist = x.getResources({
+        let reslist = x.getResources({
             reskey: "foobar"
         });
 
@@ -191,7 +566,7 @@ export const testXliff10 = {
         test.ok(x);
         test.equal(x.size(), 0);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -222,7 +597,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -245,7 +620,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var reslist = x.getResources({
+        let reslist = x.getResources({
             reskey: "foobar"
         });
 
@@ -270,7 +645,7 @@ export const testXliff10 = {
 
         test.equal(x.size(), 0);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -306,7 +681,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -329,7 +704,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var reslist = x.getResources({
+        let reslist = x.getResources({
             reskey: "foobar"
         });
 
@@ -360,7 +735,7 @@ export const testXliff10 = {
         });
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -394,7 +769,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -416,7 +791,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var reslist = x.getResources({
+        let reslist = x.getResources({
             sourceLocale: "en-US"
         });
 
@@ -443,7 +818,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ContextResourceString({
+        let res = new ContextResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             target: "gutver",
@@ -456,8 +831,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected = '<?xml version="1.0" encoding="utf-8"?>\n' +
+        let actual = x.serialize();
+        let expected = '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="nl-NL" product-name="androidapp">\n' +
             '    <body>\n' +
@@ -480,7 +855,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ContextResourceString({
+        let res = new ContextResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -502,8 +877,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
             '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -533,7 +908,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ContextResourceString({
+        let res = new ContextResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             target: "gutver",
@@ -547,8 +922,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected = '<?xml version="1.0" encoding="utf-8"?>\n' +
+        let actual = x.serialize();
+        let expected = '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="nl-NL" product-name="androidapp" x-flavor="chocolate">\n' +
             '    <body>\n' +
@@ -571,7 +946,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ContextResourceString({
+        let res = new ContextResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -597,8 +972,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
             '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -637,7 +1012,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ContextResourceString({
+        let res = new ContextResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -659,8 +1034,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
             '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -723,8 +1098,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="nl-NL" product-name="androidapp">\n' +
@@ -752,7 +1127,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             target: "foobarfoo",
@@ -829,7 +1204,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             target: "foobarfoo",
@@ -855,7 +1230,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var expected =
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
@@ -878,7 +1253,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>';
 
-        var actual = x.serialize();
+        let actual = x.serialize();
 
         diff(actual, expected);
         test.equal(actual, expected);
@@ -912,8 +1287,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="nl-NL" product-name="webapp">\n' +
@@ -963,8 +1338,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -1018,8 +1393,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="ru-RU" product-name="androidapp">\n' +
@@ -1067,8 +1442,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -1099,7 +1474,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf <b>asdf</b>",
             sourceLocale: "en-US",
             target: "Asdf 'quotes'",
@@ -1125,8 +1500,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -1158,7 +1533,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf <b>asdf</b>",
             sourceLocale: "en-US",
             target: "Asdf 'quotes'",
@@ -1184,8 +1559,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -1217,7 +1592,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Here are \"double\" and 'single' quotes.",
             sourceLocale: "en-US",
             target: "Hier zijn \"dubbel\" en 'singel' quotaties.",
@@ -1252,7 +1627,7 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             target: "Asdf translated",
@@ -1278,8 +1653,8 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
@@ -1367,7 +1742,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1424,7 +1799,7 @@ export const testXliff10 = {
                 '</xliff>');
 
         // console.log("x is " + JSON.stringify(x, undefined, 4));
-        var reslist = x.getResources();
+        let reslist = x.getResources();
         // console.log("x is now " + JSON.stringify(x, undefined, 4));
 
         test.ok(reslist);
@@ -1479,7 +1854,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1531,7 +1906,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1583,7 +1958,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1633,7 +2008,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1681,7 +2056,7 @@ export const testXliff10 = {
 
         // console.log("x is " + JSON.stringify(x, undefined, 4));
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         // console.log("after get resources x is " + JSON.stringify(x, undefined, 4));
 
@@ -1728,7 +2103,7 @@ export const testXliff10 = {
 
         // console.log("x is " + JSON.stringify(x, undefined, 4));
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         // console.log("after get resources x is " + JSON.stringify(x, undefined, 4));
 
@@ -1781,7 +2156,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1825,7 +2200,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1875,7 +2250,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1889,7 +2264,7 @@ export const testXliff10 = {
         test.equal(reslist[0].resType, "array");
         test.equal(reslist[0].getOrigin(), "source");
 
-        var items = reslist[0].getSourceArray();
+        let items = reslist[0].getSourceArray();
 
         test.equal(items.length, 4);
         test.equal(items[0], "This is element 0");
@@ -1927,7 +2302,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -1941,7 +2316,7 @@ export const testXliff10 = {
         test.equal(reslist[0].resType, "array");
         test.equal(reslist[0].getOrigin(), "source");
 
-        var items = reslist[0].getSourceArray();
+        let items = reslist[0].getSourceArray();
 
         test.equal(items.length, 4);
         test.equal(items[0], null);
@@ -1987,7 +2362,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2037,7 +2412,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2070,13 +2445,13 @@ export const testXliff10 = {
         const x = new Xliff();
         test.ok(x);
 
-        var fs = require("fs");
+        let fs = require("fs");
 
-        var str = fs.readFileSync("testfiles/test.xliff", "utf-8");
+        let str = fs.readFileSync("testfiles/test.xliff", "utf-8");
 
         x.deserialize(str);
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2112,7 +2487,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2158,7 +2533,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2203,7 +2578,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2241,7 +2616,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2277,7 +2652,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2315,7 +2690,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2354,7 +2729,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2389,7 +2764,7 @@ export const testXliff10 = {
                 '  </file>\n' +
                 '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2409,7 +2784,7 @@ export const testXliff10 = {
     testXliffTranslationUnitConstructor: function(test) {
         test.expect(1);
 
-        var tu = new TranslationUnit({
+        let tu = new TranslationUnit({
             "source": "a",
             "sourceLocale": "en-US",
             "key": "foobar",
@@ -2425,7 +2800,7 @@ export const testXliff10 = {
     testXliffTranslationUnitConstructorEverythingCopied: function(test) {
         test.expect(11);
 
-        var tu = new TranslationUnit({
+        let tu = new TranslationUnit({
             "source": "a",
             "sourceLocale": "en-US",
             "key": "foobar",
@@ -2458,7 +2833,7 @@ export const testXliff10 = {
         test.expect(1);
 
         test.throws(function() {
-            var tu = new TranslationUnit({
+            let tu = new TranslationUnit({
                 "source": "a",
                 "sourceLocale": "en-US",
                 "file": "/a/b/asdf.js",
@@ -2491,7 +2866,7 @@ export const testXliff10 = {
             "comment": "this is a comment"
         }));
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2540,7 +2915,7 @@ export const testXliff10 = {
             "comment": "this is a comment"
         }));
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -2595,7 +2970,7 @@ export const testXliff10 = {
             "comment": "this is a comment"
         }));
 
-        var units = x.getTranslationUnits();
+        let units = x.getTranslationUnits();
 
         test.ok(units);
 
@@ -2640,7 +3015,7 @@ export const testXliff10 = {
             "comment": "this is a new comment"
         }));
 
-        var units = x.getTranslationUnits();
+        let units = x.getTranslationUnits();
 
         test.ok(units);
 
@@ -2686,7 +3061,7 @@ export const testXliff10 = {
             "comment": "this is a new comment"
         }));
 
-        var units = x.getTranslationUnits();
+        let units = x.getTranslationUnits();
 
         test.ok(units);
 
@@ -2730,7 +3105,7 @@ export const testXliff10 = {
             "datatype": "javascript"
         }));
 
-        var resources = x.getResources();
+        let resources = x.getResources();
 
         test.ok(resources);
 
@@ -2780,7 +3155,7 @@ export const testXliff10 = {
             "flavor": "chocolate"
         }));
 
-        var resources = x.getResources();
+        let resources = x.getResources();
 
         test.ok(resources);
 
@@ -2826,7 +3201,7 @@ export const testXliff10 = {
             "comment": "this is a comment"
         }));
 
-        var units = x.getTranslationUnits();
+        let units = x.getTranslationUnits();
 
         test.ok(units);
 
@@ -2874,7 +3249,7 @@ export const testXliff10 = {
             "datatype": "x-xib"
         }));
 
-        var resources = x.getResources();
+        let resources = x.getResources();
 
         test.ok(resources);
 
@@ -2922,7 +3297,7 @@ export const testXliff10 = {
             "datatype": "x-xib"
         }));
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -3066,8 +3441,8 @@ export const testXliff10 = {
             "comment": "this is a comment"
         }));
 
-        var actual = x.serialize();
-        var expected =
+        let actual = x.serialize();
+        let expected =
                 '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<xliff version="1.2">\n' +
                 '  <file original="/a/b/asdf.js" source-language="en-US" target-language="de-DE" product-name="iosapp">\n' +
@@ -3104,7 +3479,7 @@ export const testXliff10 = {
         });
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -3112,7 +3487,7 @@ export const testXliff10 = {
             project: "webapp"
         });
 
-        var res2 = new ResourceString({
+        let res2 = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -3124,7 +3499,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var reslist = x.getResources({
+        let reslist = x.getResources({
             reskey: "foobar"
         });
 
@@ -3149,7 +3524,7 @@ export const testXliff10 = {
         });
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -3172,7 +3547,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var reslist = x.getResources({
+        let reslist = x.getResources({
             reskey: "foobar"
         });
 
@@ -3186,7 +3561,7 @@ export const testXliff10 = {
         test.equal(reslist[0].getProject(), "webapp");
         test.ok(!reslist[0].getComment());
 
-        var instances = reslist[0].getInstances();
+        let instances = reslist[0].getInstances();
         test.ok(instances);
         test.equal(instances.length, 1);
 
@@ -3208,7 +3583,7 @@ export const testXliff10 = {
         });
         test.ok(x);
 
-        var res = new ResourceString({
+        let res = new ResourceString({
             source: "Asdf asdf",
             sourceLocale: "en-US",
             key: "foobar",
@@ -3231,7 +3606,7 @@ export const testXliff10 = {
 
         x.addResource(res);
 
-        var expected =
+        let expected =
             '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="foo/bar/asdf.java" source-language="en-US" product-name="webapp">\n' +
@@ -3247,7 +3622,7 @@ export const testXliff10 = {
             '  </file>\n' +
             '</xliff>';
 
-        var actual = x.serialize();
+        let actual = x.serialize();
         diff(actual, expected);
 
         test.equal(actual, expected);
@@ -3293,7 +3668,7 @@ export const testXliff10 = {
             "comment": "this is a different comment"
         }));
 
-        var expected =
+        let expected =
             '<?xml version="1.0" encoding="utf-8"?>\n' +
             '<xliff version="1.2">\n' +
             '  <file original="/a/b/asdf.js" source-language="en-US" target-language="fr-FR" product-name="iosapp">\n' +
@@ -3312,7 +3687,7 @@ export const testXliff10 = {
             '  </file>\n' +
             '</xliff>';
 
-        var actual = x.serialize();
+        let actual = x.serialize();
         diff(actual, expected);
 
         test.equal(actual, expected);
@@ -3347,7 +3722,7 @@ export const testXliff10 = {
             '  </file>\n' +
             '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -3362,7 +3737,7 @@ export const testXliff10 = {
         test.equal(reslist[0].context, "asdfasdf");
         test.equal(reslist[0].comment, "this is a comment");
 
-        var instances = reslist[0].getInstances();
+        let instances = reslist[0].getInstances();
         test.ok(instances);
         test.equal(instances.length, 1);
 
@@ -3405,7 +3780,7 @@ export const testXliff10 = {
             '  </file>\n' +
             '</xliff>');
 
-        var reslist = x.getResources();
+        let reslist = x.getResources();
 
         test.ok(reslist);
 
@@ -3420,7 +3795,7 @@ export const testXliff10 = {
         test.equal(reslist[0].context, "asdfasdf");
         test.equal(reslist[0].comment, "this is a comment");
 
-        var instances = reslist[0].getInstances();
+        let instances = reslist[0].getInstances();
         test.ok(instances);
         test.equal(instances.length, 1);
 

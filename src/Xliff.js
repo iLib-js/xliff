@@ -79,9 +79,9 @@ function generatePluralComment(res, sourcePlurals, form) {
  * @private
  */
 function versionString(num) {
-    parts = ("" + num).split(".");
-    integral = parts[0].toString();
-    fraction = parts[1] || "0";
+    const parts = ("" + num).split(".");
+    const integral = parts[0].toString();
+    const fraction = parts[1] || "0";
     return integral + '.' + fraction;
 }
 
@@ -248,7 +248,7 @@ export default class Xliff {
      */
     addTranslationUnits(units) {
         units.forEach((unit) => {
-            this.addTranslationUnit(units[i]);
+            this.addTranslationUnit(unit);
         });
     }
 
@@ -263,11 +263,12 @@ export default class Xliff {
 
     /**
      * Serialize this xliff instance as an xliff 1.2 string.
-     * @param {Array.<TranslationUnit>} units an array of units to convert to a string
      * @return {String} the current instance encoded as an xliff 1.2
      * format string
      */
-    toString1(units) {
+    toString1() {
+        const units = this.tu;
+
         let json = {
             xliff: {
                 _attributes: {
@@ -380,19 +381,18 @@ export default class Xliff {
 
     /**
      * Serialize this xliff instance as an xliff 2.0 string.
-     * @param {Array.<TranslationUnit>} units an array of units to convert to a string
      * @return {String} the current instance encoded as an xliff 2.0
      * format string
      */
-    toString2(units) {
+    toString2() {
         // in xliff 2.* you can only put one source/target locale combo into a file,
         // so we have to take only the units that are allowed. We will key off the
         // first translation unit
 
-        var sourceLocale = units[0].sourceLocale;
-        var targetLocale = units[0].targetLocale;
+        var sourceLocale = this.tu[0].sourceLocale;
+        var targetLocale = this.tu[0].targetLocale;
 
-        units = units.filter(function(unit) {
+        const units = this.tu.filter((unit) => {
             return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
         });
 
@@ -554,15 +554,14 @@ export default class Xliff {
 
     /**
      * Serialize this xliff instance as an customized xliff 2.0 format string.
-     * @param {Array.<TranslationUnit>} units an array of units to convert to a string
      * @return {String} the current instance encoded as an customized xliff 2.0
      * format string
      */
-    toStringCustom(units) {
-        var sourceLocale = units[0].sourceLocale;
-        var targetLocale = units[0].targetLocale;
+    toStringCustom() {
+        var sourceLocale = this.tu[0].sourceLocale;
+        var targetLocale = this.tu[0].targetLocale;
 
-        units = units.filter(function(unit) {
+        const units = this.tu.filter((unit) => {
             return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
         });
 
@@ -710,39 +709,7 @@ export default class Xliff {
     serialize(untranslated) {
         let units = [];
 
-        if (this.ts.size() > 0) {
-            // first convert the resources into translation units
-            const resources = this.ts.getAll();
-            let tu;
-
-            if (this.allowDups) {
-                // only look at the initial set of resources
-                const initialLength = resources.length;
-                for (let i = 0; i < initialLength; i++) {
-                    const res = resources[i];
-                    const instances = res.getInstances();
-                    if (instances && instances.length) {
-                        resources = resources.concat(instances);
-                        resources[i].instances = undefined;
-                    }
-                }
-            }
-            resources.sort((left, right) => {
-                if (typeof(left.index) === 'number' && typeof(right.index) === 'number') {
-                    return left.index - right.index;
-                }
-                if (typeof(left.id) === 'number' && typeof(right.id) === 'number') {
-                    return left.id - right.id;
-                }
-                // no ids and no indexes? Well, then don't rearrange
-                return 0;
-            });
-        }
-
-        if (this.tu && this.tu.length > 0) {
-            units = units.concat(this.tu);
-        }
-        return ((this.version < 2) ? this.toString1(units) : (this.style == "custom" ? this.toStringCustom(units): this.toString2(units)));
+        return ((this.version < 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
     }
 
     /**
