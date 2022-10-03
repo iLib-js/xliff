@@ -928,9 +928,6 @@ export default class Xliff {
             compact: true
         });
 
-        // logger.trace("json is " + JSON.stringify(json, undefined, 4));
-        this.ts = new TranslationSet(this.sourceLocale);
-
         if (json.xliff) {
             if (!json.xliff._attributes || !json.xliff._attributes.version ||
                     (!json.xliff._attributes.version.startsWith("1") && !json.xliff._attributes.version.startsWith("2"))) {
@@ -945,7 +942,7 @@ export default class Xliff {
             }
         }
 
-        return this.ts;
+        return this.tu;
     };
 
     /**
