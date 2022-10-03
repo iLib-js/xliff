@@ -809,16 +809,16 @@ export default class Xliff {
      * @private
      */
     parse2(xliff) {
-        const sourceLocale = xliff._attributes["srcLang"] || this.project.sourceLocale;
+        const sourceLocale = xliff._attributes["srcLang"] || "en-US";
         const targetLocale = xliff._attributes["trgLang"];
 
         if (xliff.file) {
             const files = makeArray(xliff.file);
 
             for (var i = 0; i < files.length; i++) {
-                const fileSettings = {};
+                let fileSettings = {};
                 const file = files[i];
-                const unitsElement = [];
+                let unitsElement = [];
 
                 fileSettings = {
                     pathName: file._attributes["original"],
@@ -827,6 +827,8 @@ export default class Xliff {
                     targetLocale: targetLocale,
                     flavor: file._attributes["l:flavor"]
                 };
+
+                fileSettings.isAsianLocale = isAsianLocale(fileSettings.targetLocale);
 
                 unitsElement = (typeof (file["group"]) != 'undefined') ? file.group : file;
                 unitsElement = makeArray(unitsElement);
@@ -847,7 +849,7 @@ export default class Xliff {
                             }
 
                             const resname = tu._attributes.name;
-                            const restype = "string";
+                            let restype = "string";
                             if (tu._attributes.type && tu._attributes.type.startsWith("res:")) {
                                 restype = tu._attributes.type.substring(4);
                             }
@@ -860,8 +862,18 @@ export default class Xliff {
                                     if (segment.source["_text"]) {
                                         source += segment.source["_text"];
                                         if (segment.target) {
-                                            target += segment.target["_text"];
-
+                                            if (segment.target["_text"]) {
+                                                target += segment.target["_text"];
+                                            } else if (segment.target.mrk) {
+                                                if (Array.isArray(segment.target.mrk)) {
+                                                    const targetSegments = segment.target.mrk.map((mrk) => {
+                                                        return mrk["_text"];
+                                                    })
+                                                    target += targetSegments.join(fileSettings.isAsianLocale ? '' : ' ');
+                                                } else {
+                                                    target += segment.target.mrk["_text"];
+                                                }
+                                            }
                                             if (segment.target.state) {
                                                 state = segment.target._attributes.state;
                                             }
