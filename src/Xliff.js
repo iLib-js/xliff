@@ -24,8 +24,8 @@ import { JSUtils } from 'ilib-common';
 import TranslationUnit from './TranslationUnit.js';
 
 /**
- * @private
  * Return a string that can be used as an HTML attribute value.
+ * @private
  * @param {string} str the string to escape
  * @returns {string} the escaped string
  */
@@ -39,8 +39,8 @@ function escapeAttr(str) {
 }
 
 /**
- * @private
  * Return the original string based on the one that was used as an attribute value.
+ * @private
  * @param {string} str the string to unescape
  * @returns {string} the unescaped string
  */
@@ -100,10 +100,10 @@ function makeTUHashKey(tu) {
 }
 
 /**
- * @private
  * Return true if the given locale spec is for an Asian locale that does
  * not have spaces between words, or false for any other type of language.
  *
+ * @private
  * @param {String} spec the locale specification of the locale to test
  * @returns {boolean} true if the given spec is for an Asian locale, or
  * false otherwise
@@ -185,7 +185,7 @@ export default class Xliff {
      * @param key
      * @param type
      * @param path
-     * @returns
+     * @returns {String} the hash of the above parameters
      */
     _hashKey(project, context, sourceLocale, targetLocale, key, type, path, ordinal, quantity, flavor) {
         const hashkey = [key, type || "string", sourceLocale || this.sourceLocale, targetLocale || "", context || "", project, path || "", ordinal || "", quantity || "", flavor || ""].join("_");
