@@ -707,8 +707,6 @@ export default class Xliff {
      * xml text
      */
     serialize(untranslated) {
-        let units = [];
-
         return ((this.version < 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
     }
 
@@ -966,5 +964,15 @@ export default class Xliff {
      */
     getVersion() {
         return this.version || "1.2";
+    }
+
+    /**
+     * Clear the current xliff file of all translation units and start from scratch. All
+     * the settings from the constructor are still kept. Only the translation units are
+     * removed.
+     */
+    clear() {
+        this.tu = [];
+        this.tuhash = {};
     }
 }
