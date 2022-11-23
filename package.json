@@ -1,5 +1,5 @@
 {
-    "name": "xliff",
+    "name": "ilib-xliff",
     "version": "1.0.0",
     "main": "./lib/index.js",
     "module": "./src/index.js",
@@ -63,7 +63,9 @@
         "test": "npm-run-all build:dev test:cli",
         "test:all": "npm-run-all test:cli test:web",
         "debug": "npm run build:dev ; node --inspect-brk test/testSuite.js",
-        "clean": "git clean -f -d src test; rm -rf lib *.tgz"
+        "clean": "git clean -f -d src test; rm -rf lib *.tgz",
+        "doc": "mkdir -p docs ; jsdoc2md -c jsdoc.json --separators --source src/* -m table > docs/ilibXliff.md ; npm run doc:html",
+        "doc:html": "jsdoc -c jsdoc.json"
     },
     "devDependencies": {
         "@babel/core": "^7.19.0",

@@ -24,8 +24,8 @@ import { JSUtils } from 'ilib-common';
 import TranslationUnit from './TranslationUnit.js';
 
 /**
- * @private
  * Return a string that can be used as an HTML attribute value.
+ * @private
  * @param {string} str the string to escape
  * @returns {string} the escaped string
  */
@@ -39,8 +39,8 @@ function escapeAttr(str) {
 }
 
 /**
- * @private
  * Return the original string based on the one that was used as an attribute value.
+ * @private
  * @param {string} str the string to unescape
  * @returns {string} the unescaped string
  */
@@ -57,7 +57,7 @@ function unescapeAttr(str) {
  * @private
  */
 function generatePluralComment(res, sourcePlurals, form) {
-    var json = {};
+    const json = {};
 
     if (res.comment) {
         try {
@@ -100,16 +100,16 @@ function makeTUHashKey(tu) {
 }
 
 /**
- * @private
  * Return true if the given locale spec is for an Asian locale that does
  * not have spaces between words, or false for any other type of language.
  *
+ * @private
  * @param {String} spec the locale specification of the locale to test
  * @returns {boolean} true if the given spec is for an Asian locale, or
  * false otherwise
  */
 function isAsianLocale(spec) {
-    var locale = new Locale(spec);
+    const locale = new Locale(spec);
     switch (locale.getLanguage()) {
         case 'zh':
         case 'ja':
@@ -185,7 +185,7 @@ export default class Xliff {
      * @param key
      * @param type
      * @param path
-     * @returns
+     * @returns {String} the hash of the above parameters
      */
     _hashKey(project, context, sourceLocale, targetLocale, key, type, path, ordinal, quantity, flavor) {
         const hashkey = [key, type || "string", sourceLocale || this.sourceLocale, targetLocale || "", context || "", project, path || "", ordinal || "", quantity || "", flavor || ""].join("_");
@@ -208,12 +208,12 @@ export default class Xliff {
      */
     addTranslationUnit = function(unit) {
         // console.log("Xliff " + this.path + ": Adding translation unit: " + JSON.stringify(unit, undefined, 4));
-
-        var hashKeySource = this._hashKey(unit.project, unit.context, unit.sourceLocale, "", unit.key, unit.resType, unit.file, unit.ordinal, unit.quantity, unit.flavor),
+        let oldUnit;
+        const hashKeySource = this._hashKey(unit.project, unit.context, unit.sourceLocale, "", unit.key, unit.resType, unit.file, unit.ordinal, unit.quantity, unit.flavor),
             hashKeyTarget = this._hashKey(unit.project, unit.context, unit.sourceLocale, unit.targetLocale, unit.key, unit.resType, unit.file, unit.ordinal, unit.quantity, unit.flavor);
 
         if (unit.targetLocale) {
-            var oldUnit = this.tuhash[hashKeySource];
+            oldUnit = this.tuhash[hashKeySource];
             if (oldUnit) {
                 // console.log("Replacing old source-only unit in favour of this joint source/target unit");
                 this.tuhash[hashKeySource] = undefined;
@@ -223,7 +223,7 @@ export default class Xliff {
             }
         }
 
-        var oldUnit = this.tuhash[hashKeyTarget];
+        oldUnit = this.tuhash[hashKeyTarget];
         if (oldUnit && !this.allowDups) {
             // console.log("Merging unit");
             // update the old unit with this new info
@@ -284,13 +284,13 @@ export default class Xliff {
         let files = {};
         let index = 1;
 
-        for (var i = 0; i < units.length; i++) {
+        for (let i = 0; i < units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
             }
-            var hashKey = makeTUHashKey(tu);
-            var file = files[hashKey];
+            const hashKey = makeTUHashKey(tu);
+            let file = files[hashKey];
             if (!file) {
                 files[hashKey] = file = {
                     _attributes: {
@@ -317,7 +317,7 @@ export default class Xliff {
                 file.body = {};
             }
 
-            var tujson = {
+            const tujson = {
                 _attributes: {
                     "id": (tu.id || index++),
                     "resname": escapeAttr(tu.key),
@@ -389,8 +389,8 @@ export default class Xliff {
         // so we have to take only the units that are allowed. We will key off the
         // first translation unit
 
-        var sourceLocale = this.tu[0].sourceLocale;
-        var targetLocale = this.tu[0].targetLocale;
+        const sourceLocale = this.tu[0].sourceLocale;
+        const targetLocale = this.tu[0].targetLocale;
 
         const units = this.tu.filter((unit) => {
             return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
@@ -420,7 +420,7 @@ export default class Xliff {
         let datatype;
         let groupIndex = 1;
 
-        for (var i = 0; i < units.length; i++) {
+        for (let i = 0; i < units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
@@ -459,7 +459,7 @@ export default class Xliff {
                 }
             }
 
-            var tujson = {
+            const tujson = {
                 _attributes: {
                     "id": (tu.id || index++),
                     "name": (tu.source !== tu.key) ? escapeAttr(tu.key) : undefined,
@@ -517,12 +517,12 @@ export default class Xliff {
                 files[hashKey].group = [];
             }
 
-            var groupSet = {
+            const groupSet = {
                 _attributes: {},
                 unit: []
             }
 
-            var existGroup = files[hashKey].group.filter(function(item) {
+            const existGroup = files[hashKey].group.filter(function(item) {
                 if (item._attributes.name === datatype) {
                     return item;
                 }
@@ -558,8 +558,8 @@ export default class Xliff {
      * format string
      */
     toStringCustom() {
-        var sourceLocale = this.tu[0].sourceLocale;
-        var targetLocale = this.tu[0].targetLocale;
+        const sourceLocale = this.tu[0].sourceLocale;
+        const targetLocale = this.tu[0].targetLocale;
 
         const units = this.tu.filter((unit) => {
             return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
@@ -707,8 +707,6 @@ export default class Xliff {
      * xml text
      */
     serialize(untranslated) {
-        let units = [];
-
         return ((this.version < 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
     }
 
@@ -721,7 +719,7 @@ export default class Xliff {
             const files = makeArray(xliff.file);
             let comment;
 
-            for (var i = 0; i < files.length; i++) {
+            for (let i = 0; i < files.length; i++) {
                 let fileSettings = {};
                 let file = files[i];
 
@@ -815,7 +813,7 @@ export default class Xliff {
         if (xliff.file) {
             const files = makeArray(xliff.file);
 
-            for (var i = 0; i < files.length; i++) {
+            for (let i = 0; i < files.length; i++) {
                 let fileSettings = {};
                 const file = files[i];
                 let unitsElement = [];
@@ -835,8 +833,8 @@ export default class Xliff {
 
                 for (let j = 0; j < unitsElement.length; j++) {
                     if (unitsElement[j].unit) {
-                        var transUnits = makeArray(unitsElement[j].unit);
-                        var unitElementName = unitsElement[j]["_attributes"].name;
+                        const transUnits = makeArray(unitsElement[j].unit);
+                        const unitElementName = unitsElement[j]["_attributes"].name;
                         transUnits.forEach(function(tu) {
                             let comment, state;
                             const datatype = tu._attributes["l:datatype"] || unitElementName;
@@ -848,7 +846,7 @@ export default class Xliff {
                                     tu.notes.note["_text"];
                             }
 
-                            const resname = tu._attributes.name;
+                            let resname = tu._attributes.name;
                             let restype = "string";
                             if (tu._attributes.type && tu._attributes.type.startsWith("res:")) {
                                 restype = tu._attributes.type.substring(4);
@@ -856,7 +854,7 @@ export default class Xliff {
 
                             if (tu.segment) {
                                 const segments = makeArray(tu.segment);
-                                for (var j = 0; j < segments.length; j++) {
+                                for (let j = 0; j < segments.length; j++) {
                                     const segment = segments[j];
 
                                     if (segment.source["_text"]) {
@@ -966,5 +964,15 @@ export default class Xliff {
      */
     getVersion() {
         return this.version || "1.2";
+    }
+
+    /**
+     * Clear the current xliff file of all translation units and start from scratch. All
+     * the settings from the constructor are still kept. Only the translation units are
+     * removed.
+     */
+    clear() {
+        this.tu = [];
+        this.tuhash = {};
     }
 }
