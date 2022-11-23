@@ -57,7 +57,7 @@ function unescapeAttr(str) {
  * @private
  */
 function generatePluralComment(res, sourcePlurals, form) {
-    var json = {};
+    const json = {};
 
     if (res.comment) {
         try {
@@ -109,7 +109,7 @@ function makeTUHashKey(tu) {
  * false otherwise
  */
 function isAsianLocale(spec) {
-    var locale = new Locale(spec);
+    const locale = new Locale(spec);
     switch (locale.getLanguage()) {
         case 'zh':
         case 'ja':
@@ -208,12 +208,12 @@ export default class Xliff {
      */
     addTranslationUnit = function(unit) {
         // console.log("Xliff " + this.path + ": Adding translation unit: " + JSON.stringify(unit, undefined, 4));
-
-        var hashKeySource = this._hashKey(unit.project, unit.context, unit.sourceLocale, "", unit.key, unit.resType, unit.file, unit.ordinal, unit.quantity, unit.flavor),
+        let oldUnit;
+        const hashKeySource = this._hashKey(unit.project, unit.context, unit.sourceLocale, "", unit.key, unit.resType, unit.file, unit.ordinal, unit.quantity, unit.flavor),
             hashKeyTarget = this._hashKey(unit.project, unit.context, unit.sourceLocale, unit.targetLocale, unit.key, unit.resType, unit.file, unit.ordinal, unit.quantity, unit.flavor);
 
         if (unit.targetLocale) {
-            var oldUnit = this.tuhash[hashKeySource];
+            oldUnit = this.tuhash[hashKeySource];
             if (oldUnit) {
                 // console.log("Replacing old source-only unit in favour of this joint source/target unit");
                 this.tuhash[hashKeySource] = undefined;
@@ -223,7 +223,7 @@ export default class Xliff {
             }
         }
 
-        var oldUnit = this.tuhash[hashKeyTarget];
+        oldUnit = this.tuhash[hashKeyTarget];
         if (oldUnit && !this.allowDups) {
             // console.log("Merging unit");
             // update the old unit with this new info
@@ -284,13 +284,13 @@ export default class Xliff {
         let files = {};
         let index = 1;
 
-        for (var i = 0; i < units.length; i++) {
+        for (let i = 0; i < units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
             }
-            var hashKey = makeTUHashKey(tu);
-            var file = files[hashKey];
+            const hashKey = makeTUHashKey(tu);
+            let file = files[hashKey];
             if (!file) {
                 files[hashKey] = file = {
                     _attributes: {
@@ -317,7 +317,7 @@ export default class Xliff {
                 file.body = {};
             }
 
-            var tujson = {
+            const tujson = {
                 _attributes: {
                     "id": (tu.id || index++),
                     "resname": escapeAttr(tu.key),
@@ -389,8 +389,8 @@ export default class Xliff {
         // so we have to take only the units that are allowed. We will key off the
         // first translation unit
 
-        var sourceLocale = this.tu[0].sourceLocale;
-        var targetLocale = this.tu[0].targetLocale;
+        const sourceLocale = this.tu[0].sourceLocale;
+        const targetLocale = this.tu[0].targetLocale;
 
         const units = this.tu.filter((unit) => {
             return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
@@ -420,7 +420,7 @@ export default class Xliff {
         let datatype;
         let groupIndex = 1;
 
-        for (var i = 0; i < units.length; i++) {
+        for (let i = 0; i < units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
@@ -459,7 +459,7 @@ export default class Xliff {
                 }
             }
 
-            var tujson = {
+            const tujson = {
                 _attributes: {
                     "id": (tu.id || index++),
                     "name": (tu.source !== tu.key) ? escapeAttr(tu.key) : undefined,
@@ -517,12 +517,12 @@ export default class Xliff {
                 files[hashKey].group = [];
             }
 
-            var groupSet = {
+            const groupSet = {
                 _attributes: {},
                 unit: []
             }
 
-            var existGroup = files[hashKey].group.filter(function(item) {
+            const existGroup = files[hashKey].group.filter(function(item) {
                 if (item._attributes.name === datatype) {
                     return item;
                 }
@@ -558,8 +558,8 @@ export default class Xliff {
      * format string
      */
     toStringCustom() {
-        var sourceLocale = this.tu[0].sourceLocale;
-        var targetLocale = this.tu[0].targetLocale;
+        const sourceLocale = this.tu[0].sourceLocale;
+        const targetLocale = this.tu[0].targetLocale;
 
         const units = this.tu.filter((unit) => {
             return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
@@ -719,7 +719,7 @@ export default class Xliff {
             const files = makeArray(xliff.file);
             let comment;
 
-            for (var i = 0; i < files.length; i++) {
+            for (let i = 0; i < files.length; i++) {
                 let fileSettings = {};
                 let file = files[i];
 
@@ -813,7 +813,7 @@ export default class Xliff {
         if (xliff.file) {
             const files = makeArray(xliff.file);
 
-            for (var i = 0; i < files.length; i++) {
+            for (let i = 0; i < files.length; i++) {
                 let fileSettings = {};
                 const file = files[i];
                 let unitsElement = [];
@@ -833,8 +833,8 @@ export default class Xliff {
 
                 for (let j = 0; j < unitsElement.length; j++) {
                     if (unitsElement[j].unit) {
-                        var transUnits = makeArray(unitsElement[j].unit);
-                        var unitElementName = unitsElement[j]["_attributes"].name;
+                        const transUnits = makeArray(unitsElement[j].unit);
+                        const unitElementName = unitsElement[j]["_attributes"].name;
                         transUnits.forEach(function(tu) {
                             let comment, state;
                             const datatype = tu._attributes["l:datatype"] || unitElementName;
@@ -846,7 +846,7 @@ export default class Xliff {
                                     tu.notes.note["_text"];
                             }
 
-                            const resname = tu._attributes.name;
+                            let resname = tu._attributes.name;
                             let restype = "string";
                             if (tu._attributes.type && tu._attributes.type.startsWith("res:")) {
                                 restype = tu._attributes.type.substring(4);
@@ -854,7 +854,7 @@ export default class Xliff {
 
                             if (tu.segment) {
                                 const segments = makeArray(tu.segment);
-                                for (var j = 0; j < segments.length; j++) {
+                                for (let j = 0; j < segments.length; j++) {
                                     const segment = segments[j];
 
                                     if (segment.source["_text"]) {
