@@ -1,7 +1,7 @@
 /*
  * TranslationUnit.js - model a translation unit
  *
- * Copyright © 2022 JEDLSoft
+ * Copyright © 2022-2023 JEDLSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
  * @class A class that represents an translation unit in an
  * xliff file. 
  */
-export default class TranslationUnit {
+class TranslationUnit {
     /**
      * Construct a new translation unit The options may be undefined, which represents
      * a new, clean TranslationUnit instance. The options object may also
@@ -82,3 +82,5 @@ export default class TranslationUnit {
         return new TranslationUnit(this);
     }
 }
+
+export default TranslationUnit;

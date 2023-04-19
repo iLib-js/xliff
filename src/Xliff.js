@@ -124,7 +124,7 @@ function isAsianLocale(spec) {
  * @class A class that represents an xliff file. Xliff stands for Xml 
  * Localization Interchange File Format.
  */
-export default class Xliff {
+class Xliff {
 
     /**
      * Construct a new Xliff instance. The options may be undefined,
@@ -1008,3 +1008,5 @@ export default class Xliff {
         this.tuhash = {};
     }
 }
+
+export default Xliff;

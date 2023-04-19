@@ -28,6 +28,7 @@ limitations under the License.
 ### v1.1.0
 
 - add support for the "translate" flag on translation units
+- fixed the API documentation to be more useful
 
 ### v1.0.0
 
