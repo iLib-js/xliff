@@ -1,7 +1,7 @@
 /*
- * testXliff.js - test the Xliff object with v1.2 xliff files
+ * testXliff12.js - test the Xliff object with v1.2 xliff files
  *
- * Copyright © 2016-2017, 2019-2022 HealthTap, Inc. and JEDLSoft
+ * Copyright © 2016-2017, 2019-2023 HealthTap, Inc. and JEDLSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ function diff(a, b) {
     }
 }
 
-export const testXliff10 = {
+export const testXliff12 = {
     testXliffConstructor: function(test) {
         test.expect(1);
 
@@ -906,6 +906,92 @@ export const testXliff10 = {
         test.done();
     },
 
+    testXliffSerializeWithTranslateFlagFalse: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java",
+            translate: false
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="1" resname="foobar" restype="string" datatype="java" translate="false">\n' +
+            '        <source>Asdf asdf</source>\n' +
+            '        <target state="new">bam bam</target>\n' +
+            '        <note>This is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
+    testXliffSerializeWithTranslateFlagTrue: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java",
+            translate: true
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="1" resname="foobar" restype="string" datatype="java">\n' +
+            '        <source>Asdf asdf</source>\n' +
+            '        <target state="new">bam bam</target>\n' +
+            '        <note>This is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
     testXliffDeserializeWithSourceOnly: function(test) {
         test.expect(21);
 
@@ -961,7 +1047,7 @@ export const testXliff10 = {
     },
 
     testXliffDeserializeWithSourceAndTarget: function(test) {
-        test.expect(21);
+        test.expect(23);
 
         const x = new Xliff();
         test.ok(x);
@@ -1004,6 +1090,7 @@ export const testXliff10 = {
         test.equal(tulist[0].id, "1");
         test.equal(tulist[0].target, "foobarfoo");
         test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(typeof(tulist[0].translate), 'undefined');
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1014,6 +1101,7 @@ export const testXliff10 = {
         test.equal(tulist[1].id, "2");
         test.equal(tulist[1].target, "bebe bebe");
         test.equal(tulist[1].targetLocale, "fr-FR");
+        test.equal(typeof(tulist[1].translate), 'undefined');
 
         test.done();
     },
@@ -1641,6 +1729,129 @@ export const testXliff10 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].context, "asdfasdf");
         test.equal(tulist[1].comment, "this is a different comment");
+
+        test.done();
+    },
+
+    testXliffDeserializeWithTranslateFlagFalse: function(test) {
+        test.expect(13);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="1" resname="foobar" restype="string" translate="false">\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        // console.log("x is " + JSON.stringify(x, undefined, 4));
+        let tulist = x.getTranslationUnits();
+        // console.log("x is now " + JSON.stringify(x, undefined, 4));
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].project, "androidapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "1");
+        test.equal(tulist[0].target, "foobarfoo");
+        test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(tulist[0].translate, false);
+
+        test.done();
+    },
+
+    testXliffDeserializeWithTranslateFlagTrue: function(test) {
+        test.expect(13);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="1" resname="foobar" restype="string" translate="true">\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        // console.log("x is " + JSON.stringify(x, undefined, 4));
+        let tulist = x.getTranslationUnits();
+        // console.log("x is now " + JSON.stringify(x, undefined, 4));
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].project, "androidapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "1");
+        test.equal(tulist[0].target, "foobarfoo");
+        test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(typeof(tulist[0].translate), 'undefined');
+
+        test.done();
+    },
+
+    testXliffDeserializeWithTranslateFlagNo: function(test) {
+        test.expect(13);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="androidapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="1" resname="foobar" restype="string" translate="no">\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        // console.log("x is " + JSON.stringify(x, undefined, 4));
+        let tulist = x.getTranslationUnits();
+        // console.log("x is now " + JSON.stringify(x, undefined, 4));
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].project, "androidapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "1");
+        test.equal(tulist[0].target, "foobarfoo");
+        test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(tulist[0].translate, false);
 
         test.done();
     }

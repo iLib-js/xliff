@@ -1,7 +1,7 @@
 /*
  * testXliff20.js - test the Xliff 2.0 object.
  *
- * Copyright © 2022 JEDLSoft
+ * Copyright © 2022-2023 JEDLSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -928,8 +928,102 @@ export const testXliff20 = {
         test.done();
     },
 
+    testXliff20SerializeWithTranslateFlagFalse: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({version: 2.0});
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java",
+            translate: false
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="2.0" srcLang="en-US" trgLang="de-DE" xmlns:l="http://ilib-js.com/loctool">\n' +
+            '  <file original="foo/bar/asdf.java" l:project="webapp">\n' +
+            '    <group id="group_1" name="java">\n' +
+            '      <unit id="1" name="foobar" type="res:string" l:datatype="java" translate="false">\n' +
+            '        <notes>\n' +
+            '          <note appliesTo="source">This is a comment</note>\n' +
+            '        </notes>\n' +
+            '        <segment>\n' +
+            '          <source>Asdf asdf</source>\n' +
+            '          <target state="new">bam bam</target>\n' +
+            '        </segment>\n' +
+            '      </unit>\n' +
+            '    </group>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
+    testXliff20SerializeWithTranslateFlagTrue: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({version: 2.0});
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java",
+            translate: true
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="2.0" srcLang="en-US" trgLang="de-DE" xmlns:l="http://ilib-js.com/loctool">\n' +
+            '  <file original="foo/bar/asdf.java" l:project="webapp">\n' +
+            '    <group id="group_1" name="java">\n' +
+            '      <unit id="1" name="foobar" type="res:string" l:datatype="java">\n' +
+            '        <notes>\n' +
+            '          <note appliesTo="source">This is a comment</note>\n' +
+            '        </notes>\n' +
+            '        <segment>\n' +
+            '          <source>Asdf asdf</source>\n' +
+            '          <target state="new">bam bam</target>\n' +
+            '        </segment>\n' +
+            '      </unit>\n' +
+            '    </group>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
     testXliff20DeserializeWithSourceOnly: function(test) {
-        test.expect(21);
+        test.expect(23);
 
         const x = new Xliff({version: 2.0});
         test.ok(x);
@@ -969,6 +1063,7 @@ export const testXliff20 = {
         test.equal(tulist[0].project, "androidapp");
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "1");
+        test.equal(typeof(tulist[0].translate), 'undefined');
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -979,6 +1074,7 @@ export const testXliff20 = {
         test.equal(tulist[1].project, "webapp");
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].id, "2");
+        test.equal(typeof(tulist[1].translate), 'undefined');
 
         test.done();
     },
@@ -1679,6 +1775,129 @@ export const testXliff20 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].context, "asdfasdf");
         test.equal(tulist[1].comment, "this is a different comment");
+
+        test.done();
+    },
+
+    testXliff20DeserializeWithTranslateFlagFalse: function(test) {
+        test.expect(13);
+
+        const x = new Xliff({version: 2.0});
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="2.0" srcLang="en-US" trgLang="de-DE" xmlns:l="http://ilib-js.com/loctool">\n' +
+                '  <file original="foo/bar/asdf.java" l:project="androidapp">\n' +
+                '    <unit id="1" name="foobar" type="res:string" translate="false">\n' +
+                '      <segment>\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '      </segment>\n' +
+                '    </unit>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        // console.log("x is " + JSON.stringify(x, undefined, 4));
+        let tulist = x.getTranslationUnits();
+        // console.log("x is now " + JSON.stringify(x, undefined, 4));
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].project, "androidapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "1");
+        test.equal(tulist[0].target, "foobarfoo");
+        test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(tulist[0].translate, false);
+
+        test.done();
+    },
+
+    testXliff20DeserializeWithTranslateFlagTrue: function(test) {
+        test.expect(13);
+
+        const x = new Xliff({version: 2.0});
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="2.0" srcLang="en-US" trgLang="de-DE" xmlns:l="http://ilib-js.com/loctool">\n' +
+                '  <file original="foo/bar/asdf.java" l:project="androidapp">\n' +
+                '    <unit id="1" name="foobar" type="res:string" translate="true">\n' +
+                '      <segment>\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '      </segment>\n' +
+                '    </unit>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        // console.log("x is " + JSON.stringify(x, undefined, 4));
+        let tulist = x.getTranslationUnits();
+        // console.log("x is now " + JSON.stringify(x, undefined, 4));
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].project, "androidapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "1");
+        test.equal(tulist[0].target, "foobarfoo");
+        test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(typeof(tulist[0].translate), 'undefined');
+
+        test.done();
+    },
+
+    testXliff20DeserializeWithTranslateFlagNo: function(test) {
+        test.expect(13);
+
+        const x = new Xliff({version: 2.0});
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="2.0" srcLang="en-US" trgLang="de-DE" xmlns:l="http://ilib-js.com/loctool">\n' +
+                '  <file original="foo/bar/asdf.java" l:project="androidapp">\n' +
+                '    <unit id="1" name="foobar" type="res:string" translate="no">\n' +
+                '      <segment>\n' +
+                '        <source>Asdf asdf</source>\n' +
+                '        <target>foobarfoo</target>\n' +
+                '      </segment>\n' +
+                '    </unit>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        // console.log("x is " + JSON.stringify(x, undefined, 4));
+        let tulist = x.getTranslationUnits();
+        // console.log("x is now " + JSON.stringify(x, undefined, 4));
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Asdf asdf");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "foobar");
+        test.equal(tulist[0].file, "foo/bar/asdf.java");
+        test.equal(tulist[0].project, "androidapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "1");
+        test.equal(tulist[0].target, "foobarfoo");
+        test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(tulist[0].translate, false);
 
         test.done();
     }

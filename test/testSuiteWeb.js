@@ -1,7 +1,7 @@
 /*
  * testSuiteWeb.js - test suite for this directory
  *
- * Copyright © 2022, JEDLSoft
+ * Copyright © 2022-2023, JEDLSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-import { testXliff10 } from './testXliff10.js';
+import { testXliff12 } from './testXliff12.js';
 import { testXliff20 } from './testXliff20.js';
 
 export const tests = [
-    testXliff10,
+    testXliff12,
     testXliff20
 ];

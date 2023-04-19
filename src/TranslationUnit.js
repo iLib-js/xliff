@@ -40,7 +40,8 @@ export default class TranslationUnit {
      * <li><i>state</i> - the state of the current unit (optional)
      * <li><i>comment</i> - the translator's comment for this unit (optional)
      * <li><i>datatype</i> - the source of the data of this unit (optional)
-     * <li><i>flavor</i> - the flavor that this string comes from(optional)
+     * <li><i>flavor</i> - the flavor that this string comes from (optional)
+     * <li><i>translate</i> - flag that tells whether to translate this unit (optional)
      * </ul>
      *
      * If the required properties are not given, the constructor throws an exception.<p>
