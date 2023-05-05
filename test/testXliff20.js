@@ -1723,7 +1723,8 @@ export const testXliff20 = {
         test.expect(19);
 
         const x = new Xliff({
-            allowDups: true
+            allowDups: true,
+            version: 2.0
         });
         test.ok(x);
 
@@ -1775,6 +1776,99 @@ export const testXliff20 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].context, "asdfasdf");
         test.equal(tulist[1].comment, "this is a different comment");
+
+        test.done();
+    },
+    testXliffGetLinesDefault: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({
+            allowDups: true,
+            version: 2.0
+        });
+        test.ok(x);
+
+        // default value
+        test.equal(x.getLines(), 0);
+        test.done();
+    },
+
+    testXliffGetLinesDeserialize: function(test) {
+        test.expect(3);
+
+        const x = new Xliff({
+            allowDups: true,
+            version: 2.0
+        });
+        test.ok(x);
+
+        test.equal(x.getLines(), 0);
+
+        x.deserialize(
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="2.0" srcLang="en-US" trgLang="fr-FR" xmlns:l="http://ilib-js.com/loctool">\n' +
+            '  <file original="/a/b/asdf.js" l:project="iosapp">\n' +
+            '    <unit id="2333" name="asdf" type="res:string" l:context="asdfasdf">\n' +
+            '      <notes>\n' +
+            '        <note appliesTo="source">this is a comment</note>\n' +
+            '      </notes>\n' +
+            '      <segment>\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '      </segment>\n' +
+            '    </unit>\n' +
+            '    <unit id="2334" name="asdf" type="res:string" l:context="asdfasdf">\n' +
+            '      <notes>\n' +
+            '        <note appliesTo="target">this is a different comment</note>\n' +
+            '      </notes>\n' +
+            '      <segment>\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '      </segment>\n' +
+            '    </unit>\n' +
+            '  </file>\n' +
+            '</xliff>');
+
+        test.equal(x.getLines(), 23);
+        test.done();
+    },
+
+    testXliffGetLinesSerialize: function(test) {
+        test.expect(4);
+
+        const x = new Xliff({version: 2.0});
+        test.ok(x);
+
+        test.equal(x.getLines(), 0);
+
+        x.addTranslationUnits([
+            new TranslationUnit({
+                source: "Asdf asdf",
+                sourceLocale: "en-US",
+                target: "Asdf",
+                targetLocale: "de-DE",
+                key: 'foobar asdf',
+                file: "foo/bar/asdf.java",
+                project: "androidapp",
+                origin: "target",
+                datatype: "plaintext"
+            }),
+            new TranslationUnit({
+                source: "baby baby",
+                sourceLocale: "en-US",
+                target: "baby",
+                targetLocale: "de-DE",
+                key: "huzzah asdf test",
+                file: "foo/bar/j.java",
+                project: "webapp",
+                origin: "target",
+                datatype: "plaintext"
+            })
+        ]);
+
+        let actual = x.serialize();
+        test.ok(actual);
+        test.equal(x.getLines(), 23);
 
         test.done();
     },

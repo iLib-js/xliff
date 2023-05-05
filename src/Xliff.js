@@ -120,11 +120,19 @@ function isAsianLocale(spec) {
     }
 }
 
+const newline = /\n/g;
+
 /**
  * @class A class that represents an xliff file. Xliff stands for Xml 
  * Localization Interchange File Format.
  */
 class Xliff {
+    version = 1.2;
+    sourceLocale = "en-US";
+    // place to store the translation units
+    tu = [];
+    tuhash = {};
+    lines = 0;
 
     /**
      * Construct a new Xliff instance. The options may be undefined,
@@ -151,8 +159,6 @@ class Xliff {
      * initialize the file, or undefined for a new empty file
      */
     constructor(options) {
-        this.version = 1.2;
-
         if (options) {
             this["tool-id"] = options["tool-id"];
             this["tool-name"] = options["tool-name"];
@@ -168,12 +174,6 @@ class Xliff {
                 this.version = Number.parseFloat(options.version);
             }
         }
-
-        this.sourceLocale = this.sourceLocale || "en-US";
-
-        // place to store the translation units
-        this.tu = [];
-        this.tuhash = {};
     }
 
     /**
@@ -725,7 +725,9 @@ class Xliff {
      * xml text
      */
     serialize(untranslated) {
-        return ((this.version < 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
+        const xml = ((this.version < 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
+        this.countLines(xml);
+        return xml;
     }
 
     /**
@@ -957,6 +959,25 @@ class Xliff {
     }
 
     /**
+     * @private
+     */
+    countLines(text) {
+        newline.lastIndex = 0;
+        this.lines = 1;
+        while (newline.test(text)) {
+            this.lines++;
+        }
+    }
+
+    /**
+     * Return the number of lines in the file. This is only really
+     * accurate after it has been serialized or deserialized.
+     */
+    getLines() {
+        return this.lines;
+    }
+
+    /**
      * Deserialize the given string as an xml file in xliff format
      * into this xliff instance. If there are any existing translation
      * units already in this instance, they will be removed first.
@@ -969,6 +990,8 @@ class Xliff {
             nativeTypeAttribute: true,
             compact: true
         });
+
+        this.countLines(xml);
 
         if (json.xliff) {
             if (!json.xliff._attributes || !json.xliff._attributes.version ||
