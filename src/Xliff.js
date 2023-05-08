@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import xmljs from 'xml-js';
+import xmljs from 'ilib-xml-js';
 import Locale from 'ilib-locale';
 import { JSUtils } from 'ilib-common';
 

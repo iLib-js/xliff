@@ -100,8 +100,7 @@
     "dependencies": {
         "ilib-common": "^1.1.3",
         "ilib-locale": "^1.2.2",
-        "ilib-xml-js": "file:../xml-js/ilib-xml-js-1.7.0.tgz",
-        "json5": "^2.2.1",
-        "xml-js": "^1.6.11"
+        "ilib-xml-js": "^1.7.0",
+        "json5": "^2.2.1"
     }
 }
