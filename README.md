@@ -29,6 +29,8 @@ limitations under the License.
 
 - add support for the "translate" flag on translation units
 - fixed the API documentation to be more useful
+- added getLines() method to count the number of lines in the original
+  xml if this is being used to parse the xliff file
 - added "location" information of the start of each translation unit
   in the xml file
     - gives line number and character within the line of each
