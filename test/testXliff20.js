@@ -1023,7 +1023,7 @@ export const testXliff20 = {
     },
 
     testXliff20DeserializeWithSourceOnly: function(test) {
-        test.expect(23);
+        test.expect(25);
 
         const x = new Xliff({version: 2.0});
         test.ok(x);
@@ -1064,6 +1064,7 @@ export const testXliff20 = {
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "1");
         test.equal(typeof(tulist[0].translate), 'undefined');
+        test.deepEqual(tulist[0].location, {line: 4, char: 5});
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1075,12 +1076,13 @@ export const testXliff20 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].id, "2");
         test.equal(typeof(tulist[1].translate), 'undefined');
+        test.deepEqual(tulist[1].location, {line: 11, char: 5});
 
         test.done();
     },
 
     testXliff20DeserializeWithSourceAndTarget: function(test) {
-        test.expect(21);
+        test.expect(23);
 
         const x = new Xliff({version: 2.0});
         test.ok(x);
@@ -1123,6 +1125,7 @@ export const testXliff20 = {
         test.equal(tulist[0].id, "1");
         test.equal(tulist[0].target, "foobarfoo");
         test.equal(tulist[0].targetLocale, "de-DE");
+        test.deepEqual(tulist[0].location, {line: 3, char: 5});
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1133,6 +1136,7 @@ export const testXliff20 = {
         test.equal(tulist[1].id, "2");
         test.equal(tulist[1].target, "bebe bebe");
         test.equal(tulist[1].targetLocale, "de-DE");
+        test.deepEqual(tulist[1].location, {line: 11, char: 5});
 
         test.done();
     },

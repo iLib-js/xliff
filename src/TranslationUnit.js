@@ -42,6 +42,8 @@ class TranslationUnit {
      * <li><i>datatype</i> - the source of the data of this unit (optional)
      * <li><i>flavor</i> - the flavor that this string comes from (optional)
      * <li><i>translate</i> - flag that tells whether to translate this unit (optional)
+     * <li><i>location</i> - the line and character location of the start of this
+     * translation unit in the xml representation of the file
      * </ul>
      *
      * If the required properties are not given, the constructor throws an exception.<p>
@@ -60,14 +62,14 @@ class TranslationUnit {
             const everything = ["source", "sourceLocale", "key", "file", "project"].every((p) => {
                 return typeof(options[p]) !== "undefined";
             });
-    
+
             if (!everything) {
                 const missing = ["source", "sourceLocale", "key", "file", "project"].filter((p) => {
                     return typeof(options[p]) === "undefined";
                 });
                 throw new Error(`Missing required parameters in the TranslationUnit constructor: ${missing.join(", ")}`);
             }
-    
+
             for (let p in options) {
                 this[p] = options[p];
             }

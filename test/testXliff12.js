@@ -907,7 +907,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializeWithSourceOnly: function(test) {
-        test.expect(21);
+        test.expect(23);
 
         const x = new Xliff();
         test.ok(x);
@@ -946,6 +946,7 @@ export const testXliff12 = {
         test.equal(tulist[0].project, "androidapp");
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "1");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -956,12 +957,13 @@ export const testXliff12 = {
         test.equal(tulist[1].project, "webapp");
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].id, "2");
+        test.deepEqual(tulist[1].location, {line: 11, char: 7});
 
         test.done();
     },
 
     testXliffDeserializeWithSourceAndTarget: function(test) {
-        test.expect(21);
+        test.expect(23);
 
         const x = new Xliff();
         test.ok(x);
@@ -1004,6 +1006,7 @@ export const testXliff12 = {
         test.equal(tulist[0].id, "1");
         test.equal(tulist[0].target, "foobarfoo");
         test.equal(tulist[0].targetLocale, "de-DE");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1014,12 +1017,13 @@ export const testXliff12 = {
         test.equal(tulist[1].id, "2");
         test.equal(tulist[1].target, "bebe bebe");
         test.equal(tulist[1].targetLocale, "fr-FR");
+        test.deepEqual(tulist[1].location, {line: 12, char: 7});
 
         test.done();
     },
 
     testXliffDeserializeWithXMLUnescaping: function(test) {
-        test.expect(19);
+        test.expect(21);
 
         const x = new Xliff();
         test.ok(x);
@@ -1057,6 +1061,7 @@ export const testXliff12 = {
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "1");
         test.ok(!tulist[0].target);
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby &lt;b&gt;baby&lt;/b&gt;");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1066,6 +1071,7 @@ export const testXliff12 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].id, "2");
         test.ok(!tulist[1].target);
+        test.deepEqual(tulist[1].location, {line: 11, char: 7});
 
         test.done();
     },
@@ -1522,7 +1528,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializePreserveSourceWhitespace: function(test) {
-        test.expect(9);
+        test.expect(10);
 
         const x = new Xliff();
         test.ok(x);
@@ -1552,6 +1558,7 @@ export const testXliff12 = {
         test.equal(tulist[0].file, "UI/AddAnotherButtonView.m");
         test.equal(tulist[0].project, "iosapp");
         test.equal(tulist[0].resType, "string");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.done();
     },
@@ -1592,7 +1599,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializeStillAcceptsAnnotatesAttr: function(test) {
-        test.expect(19);
+        test.expect(21);
 
         const x = new Xliff({
             allowDups: true
@@ -1632,6 +1639,7 @@ export const testXliff12 = {
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].context, "asdfasdf");
         test.equal(tulist[0].comment, "this is a comment");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].target, "ababab");
         test.equal(tulist[1].targetLocale, "fr-FR");
@@ -1641,6 +1649,7 @@ export const testXliff12 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].context, "asdfasdf");
         test.equal(tulist[1].comment, "this is a different comment");
+        test.deepEqual(tulist[1].location, {line: 9, char: 7});
 
         test.done();
     },

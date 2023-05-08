@@ -29,6 +29,10 @@ limitations under the License.
 
 - add support for the "translate" flag on translation units
 - fixed the API documentation to be more useful
+- added "location" information of the start of each translation unit
+  in the xml file
+    - gives line number and character within the line of each
+      trans-unit (v1.2) or unit (v2.0) element in the file
 
 ### v1.0.0
 

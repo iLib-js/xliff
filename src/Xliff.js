@@ -120,10 +120,10 @@ function isAsianLocale(spec) {
     }
 }
 
-const newline = /\n/g;
+const newline = /[^\n]*\n/g;
 
 /**
- * @class A class that represents an xliff file. Xliff stands for Xml 
+ * @class A class that represents an xliff file. Xliff stands for Xml
  * Localization Interchange File Format.
  */
 class Xliff {
@@ -731,6 +731,35 @@ class Xliff {
     }
 
     /**
+     * Return the line and character number on the line for any character
+     * position in the file. Assumes that countLines() has already been
+     * called to set up the line index;
+     * @private
+     */
+    charPositionToLocation(pos) {
+        // simple binary search
+        let left = 0, right = this.lineIndex.length-1;
+
+        while ((right - left) > 1) {
+            let middle = Math.trunc((left + right) / 2);
+            if (pos < this.lineIndex[middle]) {
+                right = middle;
+            } else if (pos > this.lineIndex[middle]) {
+                left = middle;
+            } else if (pos === this.lineIndex[middle]) {
+                return {
+                   line: middle,
+                   char: 0
+                };
+            }
+        }
+        return {
+            line: left,
+            char: pos - this.lineIndex[left]
+        };
+    }
+
+    /**
      * Parse xliff 1.* files
      * @private
      */
@@ -761,6 +790,8 @@ class Xliff {
 
                         if (tu.source && tu.source["_text"] && tu.source["_text"].trim().length > 0) {
                             let targetString;
+                            let location;
+
                             if (tu.target) {
                                 if (tu.target["_text"]) {
                                     targetString = tu.target["_text"];
@@ -783,6 +814,9 @@ class Xliff {
                                 } else {
                                     tu._attributes.resname = tu.source["_text"];
                                 }
+                            }
+                            if (tu._position) {
+                                location = this.charPositionToLocation(tu._position);
                             }
 
                             if (tu._attributes.translate &&
@@ -807,7 +841,8 @@ class Xliff {
                                     state: tu.target && tu.target._attributes && tu.target._attributes.state,
                                     datatype: tu._attributes.datatype,
                                     flavor: fileSettings.flavor,
-                                    translate
+                                    translate,
+                                    location
                                 });
                                 switch (unit.resType) {
                                 case "array":
@@ -864,7 +899,7 @@ class Xliff {
                         const transUnits = makeArray(unitsElement[j].unit);
                         const unitElementName = unitsElement[j]["_attributes"].name;
                         transUnits.forEach((tu) => {
-                            let comment, state, translate;
+                            let comment, state, translate, location;
                             const datatype = tu._attributes["l:datatype"] || unitElementName;
                             let source = "", target = "";
 
@@ -878,6 +913,9 @@ class Xliff {
                             let restype = "string";
                             if (tu._attributes.type && tu._attributes.type.startsWith("res:")) {
                                 restype = tu._attributes.type.substring(4);
+                            }
+                            if (tu._position) {
+                                location = this.charPositionToLocation(tu._position);
                             }
 
                             if (tu.segment) {
@@ -934,7 +972,8 @@ class Xliff {
                                         state: state,
                                         datatype: datatype,
                                         flavor: fileSettings.flavor,
-                                        translate
+                                        translate,
+                                        location
                                     });
                                     switch (restype) {
                                     case "array":
@@ -964,9 +1003,19 @@ class Xliff {
     countLines(text) {
         newline.lastIndex = 0;
         this.lines = 1;
-        while (newline.test(text)) {
+        this.lineIndex = [];
+        this.fileLength = text.length;
+
+        // set up the line index with the index of the
+        // start of each line in the text
+        let match;
+        let index = 0;
+        while ((match = newline.exec(text)) !== null) {
             this.lines++;
+            this.lineIndex.push(index);
+            index += match[0].length;
         }
+        this.lineIndex.push(index);
     }
 
     /**
@@ -988,7 +1037,8 @@ class Xliff {
         const json = xmljs.xml2js(xml, {
             trim: false,
             nativeTypeAttribute: true,
-            compact: true
+            compact: true,
+            position: true
         });
 
         this.countLines(xml);
