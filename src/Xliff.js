@@ -1,7 +1,7 @@
 /*
  * Xliff.js - model an xliff file
  *
- * Copyright © 2016-2017, 2019-2022 HealthTap, Inc. and JEDLSoft
+ * Copyright © 2016-2017, 2019-2023 HealthTap, Inc. and JEDLSoft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
