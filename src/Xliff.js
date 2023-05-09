@@ -124,7 +124,7 @@ function isAsianLocale(spec) {
  * @class A class that represents an xliff file. Xliff stands for Xml 
  * Localization Interchange File Format.
  */
-export default class Xliff {
+class Xliff {
 
     /**
      * Construct a new Xliff instance. The options may be undefined,
@@ -329,6 +329,12 @@ export default class Xliff {
                 }
             };
 
+            // by default, you translate everything, so only put the translate flag
+            // when it is false
+            if (typeof(tu.translate) === "boolean" && !tu.translate) {
+                tujson._attributes.translate = tu.translate;
+            }
+
             if (tu.id && tu.id > index) {
                 index = tu.id + 1;
             }
@@ -467,6 +473,12 @@ export default class Xliff {
                     "l:datatype": tu.datatype
                 }
             };
+
+            // by default, you translate everything, so only put the translate flag
+            // when it is false
+            if (typeof(tu.translate) === "boolean" && !tu.translate) {
+                tujson._attributes.translate = tu.translate;
+            }
 
             if (tu.comment) {
                 tujson.notes = {
@@ -622,6 +634,12 @@ export default class Xliff {
                 }
             };
 
+            // by default, you translate everything, so only put the translate flag
+            // when it is false
+            if (typeof(tu.translate) === "boolean" && !tu.translate) {
+                tujson._attributes.translate = tu.translate;
+            }
+
             if (tu.comment) {
                 tujson.notes = {
                     "note": [
@@ -737,6 +755,8 @@ export default class Xliff {
                     const units = makeArray(file.body["trans-unit"]);
 
                     units.forEach((tu) => {
+                        let translate;
+
                         if (tu.source && tu.source["_text"] && tu.source["_text"].trim().length > 0) {
                             let targetString;
                             if (tu.target) {
@@ -763,6 +783,11 @@ export default class Xliff {
                                 }
                             }
 
+                            if (tu._attributes.translate &&
+                                    (tu._attributes.translate === "no" || tu._attributes.translate === "false")) {
+                                translate = false;
+                            }
+
                             try {
                                 const unit = new TranslationUnit({
                                     file: fileSettings.pathName,
@@ -779,7 +804,8 @@ export default class Xliff {
                                     resType: tu._attributes.restype,
                                     state: tu.target && tu.target._attributes && tu.target._attributes.state,
                                     datatype: tu._attributes.datatype,
-                                    flavor: fileSettings.flavor
+                                    flavor: fileSettings.flavor,
+                                    translate
                                 });
                                 switch (unit.resType) {
                                 case "array":
@@ -835,8 +861,8 @@ export default class Xliff {
                     if (unitsElement[j].unit) {
                         const transUnits = makeArray(unitsElement[j].unit);
                         const unitElementName = unitsElement[j]["_attributes"].name;
-                        transUnits.forEach(function(tu) {
-                            let comment, state;
+                        transUnits.forEach((tu) => {
+                            let comment, state, translate;
                             const datatype = tu._attributes["l:datatype"] || unitElementName;
                             let source = "", target = "";
 
@@ -880,6 +906,11 @@ export default class Xliff {
                                 }
                             }
 
+                            if (tu._attributes.translate &&
+                                    (tu._attributes.translate === "no" || tu._attributes.translate === "false")) {
+                                translate = false;
+                            }
+
                             if (!resname) {
                                 resname = source;
                             }
@@ -900,7 +931,8 @@ export default class Xliff {
                                         resType: restype,
                                         state: state,
                                         datatype: datatype,
-                                        flavor: fileSettings.flavor
+                                        flavor: fileSettings.flavor,
+                                        translate
                                     });
                                     switch (restype) {
                                     case "array":
@@ -917,7 +949,7 @@ export default class Xliff {
                             } else {
                                 // console.log("Found translation unit with an empty or missing source element. File: " + fileSettings.pathName + " Resname: " + tu.resname);
                             }
-                        }.bind(this));
+                        });
                     }
                 }
             }
@@ -976,3 +1008,5 @@ export default class Xliff {
         this.tuhash = {};
     }
 }
+
+export default Xliff;
