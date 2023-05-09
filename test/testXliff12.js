@@ -906,6 +906,92 @@ export const testXliff12 = {
         test.done();
     },
 
+    testXliffSerializeWithTranslateFlagFalse: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java",
+            translate: false
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="1" resname="foobar" restype="string" datatype="java" translate="false">\n' +
+            '        <source>Asdf asdf</source>\n' +
+            '        <target state="new">bam bam</target>\n' +
+            '        <note>This is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
+    testXliffSerializeWithTranslateFlagTrue: function(test) {
+        test.expect(2);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        const tu = new TranslationUnit({
+            source: "Asdf asdf",
+            sourceLocale: "en-US",
+            target: "bam bam",
+            targetLocale: "de-DE",
+            key: "foobar",
+            file: "foo/bar/asdf.java",
+            project: "webapp",
+            resType: "string",
+            state: "new",
+            comment: "This is a comment",
+            datatype: "java",
+            translate: true
+        })
+
+        x.addTranslationUnit(tu);
+
+        let actual = x.serialize();
+        let expected =
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="foo/bar/asdf.java" source-language="en-US" target-language="de-DE" product-name="webapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="1" resname="foobar" restype="string" datatype="java">\n' +
+            '        <source>Asdf asdf</source>\n' +
+            '        <target state="new">bam bam</target>\n' +
+            '        <note>This is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>';
+
+        diff(actual, expected);
+        test.equal(actual, expected);
+        test.done();
+    },
+
     testXliffDeserializeWithSourceOnly: function(test) {
         test.expect(23);
 
@@ -963,7 +1049,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializeWithSourceAndTarget: function(test) {
-        test.expect(23);
+        test.expect(25);
 
         const x = new Xliff();
         test.ok(x);
@@ -1006,6 +1092,7 @@ export const testXliff12 = {
         test.equal(tulist[0].id, "1");
         test.equal(tulist[0].target, "foobarfoo");
         test.equal(tulist[0].targetLocale, "de-DE");
+        test.equal(typeof(tulist[0].translate), 'undefined');
         test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby baby");
@@ -1017,6 +1104,7 @@ export const testXliff12 = {
         test.equal(tulist[1].id, "2");
         test.equal(tulist[1].target, "bebe bebe");
         test.equal(tulist[1].targetLocale, "fr-FR");
+        test.equal(typeof(tulist[1].translate), 'undefined');
         test.deepEqual(tulist[1].location, {line: 12, char: 7});
 
         test.done();
