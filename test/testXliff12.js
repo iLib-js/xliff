@@ -1755,6 +1755,19 @@ export const testXliff12 = {
         test.done();
     },
 
+    testXliffGetBytesDefault: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({
+            allowDups: true
+        });
+        test.ok(x);
+
+        // default value
+        test.equal(x.getBytes(), 0);
+        test.done();
+    },
+
     testXliffGetLinesDeserialize: function(test) {
         test.expect(3);
 
@@ -1824,6 +1837,79 @@ export const testXliff12 = {
         let actual = x.serialize();
         test.ok(actual);
         test.equal(x.getLines(), 19);
+
+        test.done();
+    },
+
+    testXliffGetBytesDeserialize: function(test) {
+        test.expect(3);
+
+        const x = new Xliff({
+            allowDups: true
+        });
+        test.ok(x);
+
+        test.equal(x.getBytes(), 0);
+
+        x.deserialize(
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="/a/b/asdf.js" source-language="en-US" target-language="fr-FR" product-name="iosapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="2333" resname="asdf" restype="string" x-context="asdfasdf">\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '        <note annotates="source">this is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '      <trans-unit id="2334" resname="asdf" restype="string" x-context="asdfasdf">\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '        <note annotates="source">this is a different comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>');
+
+        test.equal(x.getBytes(), 663);
+        test.done();
+    },
+
+    testXliffGetBytesSerialize: function(test) {
+        test.expect(4);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        test.equal(x.getBytes(), 0);
+
+        x.addTranslationUnits([
+            new TranslationUnit({
+                source: "Asdf asdf",
+                sourceLocale: "en-US",
+                target: "Asdf",
+                targetLocale: "de-DE",
+                key: 'foobar asdf',
+                file: "foo/bar/asdf.java",
+                project: "androidapp",
+                origin: "target",
+                datatype: "plaintext"
+            }),
+            new TranslationUnit({
+                source: "baby baby",
+                sourceLocale: "en-US",
+                target: "baby",
+                targetLocale: "de-DE",
+                key: "huzzah asdf test",
+                file: "foo/bar/j.java",
+                project: "webapp",
+                origin: "target",
+                datatype: "plaintext"
+            })
+        ]);
+
+        let actual = x.serialize();
+        test.ok(actual);
+        test.equal(x.getBytes(), 699);
 
         test.done();
     },

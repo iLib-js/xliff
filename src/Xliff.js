@@ -1023,7 +1023,15 @@ class Xliff {
      * accurate after it has been serialized or deserialized.
      */
     getLines() {
-        return this.lines;
+        return this.lines || 0;
+    }
+
+    /**
+     * Return the number of bytes in the file. This is only really
+     * accurate after it has been serialized or deserialized.
+     */
+    getBytes() {
+        return this.fileLength || 0;
     }
 
     /**
