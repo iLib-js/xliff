@@ -993,7 +993,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializeWithSourceOnly: function(test) {
-        test.expect(21);
+        test.expect(23);
 
         const x = new Xliff();
         test.ok(x);
@@ -1032,6 +1032,7 @@ export const testXliff12 = {
         test.equal(tulist[0].project, "androidapp");
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "1");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1042,12 +1043,13 @@ export const testXliff12 = {
         test.equal(tulist[1].project, "webapp");
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].id, "2");
+        test.deepEqual(tulist[1].location, {line: 11, char: 7});
 
         test.done();
     },
 
     testXliffDeserializeWithSourceAndTarget: function(test) {
-        test.expect(23);
+        test.expect(25);
 
         const x = new Xliff();
         test.ok(x);
@@ -1091,6 +1093,7 @@ export const testXliff12 = {
         test.equal(tulist[0].target, "foobarfoo");
         test.equal(tulist[0].targetLocale, "de-DE");
         test.equal(typeof(tulist[0].translate), 'undefined');
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby baby");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1102,12 +1105,13 @@ export const testXliff12 = {
         test.equal(tulist[1].target, "bebe bebe");
         test.equal(tulist[1].targetLocale, "fr-FR");
         test.equal(typeof(tulist[1].translate), 'undefined');
+        test.deepEqual(tulist[1].location, {line: 12, char: 7});
 
         test.done();
     },
 
     testXliffDeserializeWithXMLUnescaping: function(test) {
-        test.expect(19);
+        test.expect(21);
 
         const x = new Xliff();
         test.ok(x);
@@ -1145,6 +1149,7 @@ export const testXliff12 = {
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "1");
         test.ok(!tulist[0].target);
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].source, "baby &lt;b&gt;baby&lt;/b&gt;");
         test.equal(tulist[1].sourceLocale, "en-US");
@@ -1154,6 +1159,7 @@ export const testXliff12 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].id, "2");
         test.ok(!tulist[1].target);
+        test.deepEqual(tulist[1].location, {line: 11, char: 7});
 
         test.done();
     },
@@ -1610,7 +1616,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializePreserveSourceWhitespace: function(test) {
-        test.expect(9);
+        test.expect(10);
 
         const x = new Xliff();
         test.ok(x);
@@ -1640,6 +1646,7 @@ export const testXliff12 = {
         test.equal(tulist[0].file, "UI/AddAnotherButtonView.m");
         test.equal(tulist[0].project, "iosapp");
         test.equal(tulist[0].resType, "string");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.done();
     },
@@ -1680,7 +1687,7 @@ export const testXliff12 = {
     },
 
     testXliffDeserializeStillAcceptsAnnotatesAttr: function(test) {
-        test.expect(19);
+        test.expect(21);
 
         const x = new Xliff({
             allowDups: true
@@ -1720,6 +1727,7 @@ export const testXliff12 = {
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].context, "asdfasdf");
         test.equal(tulist[0].comment, "this is a comment");
+        test.deepEqual(tulist[0].location, {line: 4, char: 7});
 
         test.equal(tulist[1].target, "ababab");
         test.equal(tulist[1].targetLocale, "fr-FR");
@@ -1729,6 +1737,179 @@ export const testXliff12 = {
         test.equal(tulist[1].resType, "string");
         test.equal(tulist[1].context, "asdfasdf");
         test.equal(tulist[1].comment, "this is a different comment");
+        test.deepEqual(tulist[1].location, {line: 9, char: 7});
+
+        test.done();
+    },
+
+    testXliffGetLinesDefault: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({
+            allowDups: true
+        });
+        test.ok(x);
+
+        // default value
+        test.equal(x.getLines(), 0);
+        test.done();
+    },
+
+    testXliffGetBytesDefault: function(test) {
+        test.expect(2);
+
+        const x = new Xliff({
+            allowDups: true
+        });
+        test.ok(x);
+
+        // default value
+        test.equal(x.getBytes(), 0);
+        test.done();
+    },
+
+    testXliffGetLinesDeserialize: function(test) {
+        test.expect(3);
+
+        const x = new Xliff({
+            allowDups: true
+        });
+        test.ok(x);
+
+        test.equal(x.getLines(), 0);
+
+        x.deserialize(
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="/a/b/asdf.js" source-language="en-US" target-language="fr-FR" product-name="iosapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="2333" resname="asdf" restype="string" x-context="asdfasdf">\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '        <note annotates="source">this is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '      <trans-unit id="2334" resname="asdf" restype="string" x-context="asdfasdf">\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '        <note annotates="source">this is a different comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>');
+
+        test.equal(x.getLines(), 17);
+        test.done();
+    },
+
+    testXliffGetLinesSerialize: function(test) {
+        test.expect(4);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        test.equal(x.getLines(), 0);
+
+        x.addTranslationUnits([
+            new TranslationUnit({
+                source: "Asdf asdf",
+                sourceLocale: "en-US",
+                target: "Asdf",
+                targetLocale: "de-DE",
+                key: 'foobar asdf',
+                file: "foo/bar/asdf.java",
+                project: "androidapp",
+                origin: "target",
+                datatype: "plaintext"
+            }),
+            new TranslationUnit({
+                source: "baby baby",
+                sourceLocale: "en-US",
+                target: "baby",
+                targetLocale: "de-DE",
+                key: "huzzah asdf test",
+                file: "foo/bar/j.java",
+                project: "webapp",
+                origin: "target",
+                datatype: "plaintext"
+            })
+        ]);
+
+        let actual = x.serialize();
+        test.ok(actual);
+        test.equal(x.getLines(), 19);
+
+        test.done();
+    },
+
+    testXliffGetBytesDeserialize: function(test) {
+        test.expect(3);
+
+        const x = new Xliff({
+            allowDups: true
+        });
+        test.ok(x);
+
+        test.equal(x.getBytes(), 0);
+
+        x.deserialize(
+            '<?xml version="1.0" encoding="utf-8"?>\n' +
+            '<xliff version="1.2">\n' +
+            '  <file original="/a/b/asdf.js" source-language="en-US" target-language="fr-FR" product-name="iosapp">\n' +
+            '    <body>\n' +
+            '      <trans-unit id="2333" resname="asdf" restype="string" x-context="asdfasdf">\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '        <note annotates="source">this is a comment</note>\n' +
+            '      </trans-unit>\n' +
+            '      <trans-unit id="2334" resname="asdf" restype="string" x-context="asdfasdf">\n' +
+            '        <source>bababa</source>\n' +
+            '        <target>ababab</target>\n' +
+            '        <note annotates="source">this is a different comment</note>\n' +
+            '      </trans-unit>\n' +
+            '    </body>\n' +
+            '  </file>\n' +
+            '</xliff>');
+
+        test.equal(x.getBytes(), 663);
+        test.done();
+    },
+
+    testXliffGetBytesSerialize: function(test) {
+        test.expect(4);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        test.equal(x.getBytes(), 0);
+
+        x.addTranslationUnits([
+            new TranslationUnit({
+                source: "Asdf asdf",
+                sourceLocale: "en-US",
+                target: "Asdf",
+                targetLocale: "de-DE",
+                key: 'foobar asdf',
+                file: "foo/bar/asdf.java",
+                project: "androidapp",
+                origin: "target",
+                datatype: "plaintext"
+            }),
+            new TranslationUnit({
+                source: "baby baby",
+                sourceLocale: "en-US",
+                target: "baby",
+                targetLocale: "de-DE",
+                key: "huzzah asdf test",
+                file: "foo/bar/j.java",
+                project: "webapp",
+                origin: "target",
+                datatype: "plaintext"
+            })
+        ]);
+
+        let actual = x.serialize();
+        test.ok(actual);
+        test.equal(x.getBytes(), 699);
 
         test.done();
     },
