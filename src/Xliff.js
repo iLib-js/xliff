@@ -762,27 +762,47 @@ class Xliff {
 
     /**
      * Returns text content of an element which may contain content markup (i.e. inline elements) as defined in [XLIFF
-     * 1.2 spec](https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#Struct_InLine).
+     * 1.2 spec: 2.4. Inline Elements](https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#Struct_InLine).
      *
-     * Recursively visits all child elements and concatenates their text content and equiv-text attributes if present.
+     * Recursively visits child elements and concatenates their text content. If an element has no text content,
+     * `equiv-text` attribute content is used instead.
      *
      * @private
      * @param {import("ilib-xml-js").Element} contentElement XLIFF content element (e.g. <source> or <target>)
      * @returns {string}
      */
-    static getTextContent(contentElement) {
-        /** @type {(el: import("ilib-xml-js").Element) => string} */
+    static getTextWithContentMarkup(contentElement) {
+        /** @type {(el: import("ilib-xml-js").Element) => string | undefined} */
         const visitElement = (el) => {
             if (el.type === "text") {
-                return String(el.text ?? "");
-            } else if (el.type === "element") {
-                const equivText = el.attributes?.["equiv-text"] ?? "";
-                const children = el.elements?.map(visitElement).join("") ?? "";
-                return [equivText, children].join("");
-            } else return "";
+                if (el.text === undefined) {
+                    return undefined;
+                }
+                return String(el.text);
+            }
+
+            if (el.type === "element") {
+                // recurse into child elements
+                const content = el.elements
+                    ?.map(visitElement)
+                    .filter((text) => text !== undefined)
+                    .join("");
+                if (content !== undefined) {
+                    // prefer actual content over equiv-text
+                    return content;
+                }
+
+                const equivText = el.attributes?.["equiv-text"];
+                if (equivText !== undefined) {
+                    // fallback to equiv-text if no content
+                    return String(equivText);
+                }
+            }
+
+            return undefined;
         };
 
-        return visitElement(contentElement);
+        return visitElement(contentElement) ?? "";
     }
 
     /**
@@ -799,7 +819,6 @@ class Xliff {
             const project = getAttr(file, "product-name") || getAttr(file, "original");
             const targetLocale = getAttr(file, "target-language");
             const flavor = getAttr(file, "x-flavor");
-            const isAsian = targetLocale ? isAsianLocale(targetLocale) : false;
 
             const body = getChildren(file, "body")?.[0];
             const units = getChildren(body, "trans-unit") ?? [];
@@ -815,9 +834,7 @@ class Xliff {
                 const datatype = getAttr(tu, "datatype");
 
                 const source = getChildren(tu, "source")?.[0];
-                const target = getChildren(tu, "target")?.[0];
-
-                const sourceString = source && Xliff.getTextContent(source);
+                const sourceString = source && Xliff.getTextWithContentMarkup(source);
                 if (!sourceString?.trim()) {
                     // console.log("Found translation unit with an empty or missing source element. File: " + pathName + " Resname: " + resname);
                     continue;
@@ -825,18 +842,9 @@ class Xliff {
 
                 const resname = getAttr(tu, "resname") || getAttr(source, "x-key") || sourceString;
 
-                let targetString = undefined;
-                if (target) {
-                    const targetText = getText(target);
-                    if (targetText) {
-                        targetString = targetText;
-                    } else {
-                        const targetSegments = getChildren(target, "mrk") ?? [];
-                        if (targetSegments.length > 0) {
-                            targetString = targetSegments.map((mrk) => getText(mrk)).join(isAsian ? "" : " ");
-                        }
-                    }
-                }
+                const target = getChildren(tu, "target")?.[0];
+                const targetString = target && Xliff.getTextWithContentMarkup(target);
+
                 const state = getAttr(target, "state");
 
                 // @ts-expect-error -- position is an untyped ilib-xml-js extension to xml-js Element type
@@ -1081,7 +1089,8 @@ class Xliff {
                     trim: false,
                     nativeTypeAttribute: true,
                     compact: false,
-                    position: true
+                    position: true,
+                    captureSpacesBetweenElements: true
                 }));
                 const xliffLarge = /** @type {Element} */ (jsonLarge.elements?.find(e => e.type === 'element' && e.name === 'xliff'));
                 this.parse1(xliffLarge);

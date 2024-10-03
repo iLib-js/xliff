@@ -8,7 +8,7 @@
  */
 export const getAttribute = (element, attrName) => {
     const value = element?.attributes?.[attrName];
-    if (value) {
+    if (value !== undefined) {
         return String(value);
     } else {
         return undefined;
@@ -23,7 +23,7 @@ export const getAttribute = (element, attrName) => {
  * @returns {string | undefined}
  */
 export const getText = (element) => {
-    if (!element) {
+    if (element === undefined) {
         return undefined;
     }
     const textElement = element.elements?.find((e) => e.type === "text");
