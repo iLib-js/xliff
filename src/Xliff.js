@@ -761,103 +761,101 @@ class Xliff {
     }
 
     /**
-     * Returns text content of an element which may contain content markup (i.e. inline elements)
-     * as defined in [XLIFF 1.2 spec](https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#Struct_InLine).
-     * 
+     * Returns text content of an element which may contain content markup (i.e. inline elements) as defined in [XLIFF
+     * 1.2 spec](https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#Struct_InLine).
+     *
      * Recursively visits all child elements and concatenates their text content and equiv-text attributes if present.
-     * 
-     * @param {import('ilib-xml-js').Element} contentElement XLIFF content element (e.g. <source> or <target>)
-     * @returns {string}
+     *
      * @private
+     * @param {import("ilib-xml-js").Element} contentElement XLIFF content element (e.g. <source> or <target>)
+     * @returns {string}
      */
     static getTextContent(contentElement) {
-        /** @type {(el: import('ilib-xml-js').Element) => string} */
+        /** @type {(el: import("ilib-xml-js").Element) => string} */
         const visitElement = (el) => {
-            if (el.type === 'text') {
-                return String(el.text ?? '');
-            } else if (el.type === 'element') {
-                const equivText = el.attributes?.['equiv-text'] ?? '';
-                const children = el.elements?.map(visitElement).join('') ?? '';
-                return [ equivText, children ].join('');
-            } else return '';
-        }
+            if (el.type === "text") {
+                return String(el.text ?? "");
+            } else if (el.type === "element") {
+                const equivText = el.attributes?.["equiv-text"] ?? "";
+                const children = el.elements?.map(visitElement).join("") ?? "";
+                return [equivText, children].join("");
+            } else return "";
+        };
 
         return visitElement(contentElement);
     }
 
     /**
      * Parse xliff 1.* files
+     *
      * @private
-     * 
-     * @param {import('ilib-xml-js').Element} xliff
+     * @param {import("ilib-xml-js").Element} xliff
      */
     parse1(xliff) {
         const files = getChildren(xliff, "file") ?? [];
-            for (const file of files) {
-                const pathName = getAttr(file, "original");
-                const sourceLocale = getAttr(file, "source-language");
-                const project = getAttr(file, "product-name") || getAttr(file, "original");
-                const targetLocale = getAttr(file, "target-language");
-                const flavor = getAttr(file, "x-flavor");
-                const isAsian = targetLocale ? isAsianLocale(targetLocale) : false;
+        for (const file of files) {
+            const pathName = getAttr(file, "original");
+            const sourceLocale = getAttr(file, "source-language");
+            const project = getAttr(file, "product-name") || getAttr(file, "original");
+            const targetLocale = getAttr(file, "target-language");
+            const flavor = getAttr(file, "x-flavor");
+            const isAsian = targetLocale ? isAsianLocale(targetLocale) : false;
 
-                const body = getChildren(file, "body")?.[0];
-                const units = getChildren(body, 'trans-unit') ?? [];
-                for (const tu of units) {
-                    const id = getAttr(tu, "id");
-                    // by convention in this library, translate flag can only be false or undefined (which means true)
-                    const translate = ['no', 'false'].includes(getAttr(tu, "translate")?.toLowerCase() ?? '') ? false : undefined;
-                    const context = getAttr(tu, "x-context");
-                    const comment = getText(getChildren(tu, "note")?.[0]);
-                    const resType = getAttr(tu, "restype");
-                    const datatype = getAttr(tu, "datatype");
+            const body = getChildren(file, "body")?.[0];
+            const units = getChildren(body, "trans-unit") ?? [];
+            for (const tu of units) {
+                const id = getAttr(tu, "id");
+                // by convention in this library, translate flag can only be false or undefined (which means true)
+                const translate = ["no", "false"].includes(getAttr(tu, "translate")?.toLowerCase() ?? "")
+                    ? false
+                    : undefined;
+                const context = getAttr(tu, "x-context");
+                const comment = getText(getChildren(tu, "note")?.[0]);
+                const resType = getAttr(tu, "restype");
+                const datatype = getAttr(tu, "datatype");
 
-                    const source = getChildren(tu, 'source')?.[0];
-                    const target = getChildren(tu, 'target')?.[0];
+                const source = getChildren(tu, "source")?.[0];
+                const target = getChildren(tu, "target")?.[0];
 
-                    const sourceString = source && Xliff.getTextContent(source);
-                    if (!sourceString?.trim()) {
-                        // console.log("Found translation unit with an empty or missing source element. File: " + pathName + " Resname: " + resname);
-                        continue;
-                    }
+                const sourceString = source && Xliff.getTextContent(source);
+                if (!sourceString?.trim()) {
+                    // console.log("Found translation unit with an empty or missing source element. File: " + pathName + " Resname: " + resname);
+                    continue;
+                }
 
-                    const resname = getAttr(tu, "resname")
-                        || getAttr(source, "x-key")
-                        || sourceString;
-                    
-                    let targetString = undefined;
-                    if (target) {
-                        const targetText = getText(target);
-                        if (targetText) {
-                            targetString = targetText;
-                        } else {
-                            const targetSegments = getChildren(target, "mrk") ?? [];
-                            if (targetSegments.length > 0) {
-                                targetString = targetSegments
-                                    .map(mrk => getText(mrk))
-                                    .join(isAsian ? '' : ' ');
-                            }
+                const resname = getAttr(tu, "resname") || getAttr(source, "x-key") || sourceString;
+
+                let targetString = undefined;
+                if (target) {
+                    const targetText = getText(target);
+                    if (targetText) {
+                        targetString = targetText;
+                    } else {
+                        const targetSegments = getChildren(target, "mrk") ?? [];
+                        if (targetSegments.length > 0) {
+                            targetString = targetSegments.map((mrk) => getText(mrk)).join(isAsian ? "" : " ");
                         }
                     }
-                    const state = getAttr(target, "state");
+                }
+                const state = getAttr(target, "state");
 
-                    // @ts-expect-error -- position is an untyped ilib-xml-js extension to xml-js Element type
-                    const location = this.charPositionToLocation(tu.position);
+                // @ts-expect-error -- position is an untyped ilib-xml-js extension to xml-js Element type
+                const location = this.charPositionToLocation(tu.position);
 
-                    let ordinal = undefined;
-                    if (resType === "array") {
-                        const extype = getAttr(tu, "extype");
-                        ordinal = extype ? Number(extype).valueOf() : undefined;
-                    }
+                let ordinal = undefined;
+                if (resType === "array") {
+                    const extype = getAttr(tu, "extype");
+                    ordinal = extype ? Number(extype).valueOf() : undefined;
+                }
 
-                    let quantity = undefined;
-                    if (resType === "plural") {
-                        quantity = getAttr(tu, "extype");
-                    }
-                        
+                let quantity = undefined;
+                if (resType === "plural") {
+                    quantity = getAttr(tu, "extype");
+                }
 
-                    try {                        
-                        this.tu.push(new TranslationUnit({
+                try {
+                    this.tu.push(
+                        new TranslationUnit({
                             file: pathName,
                             sourceLocale,
                             project,
@@ -876,12 +874,13 @@ class Xliff {
                             location,
                             ordinal,
                             quantity
-                        }));
-                    } catch (e) {
-                        console.log("Skipping invalid translation unit found in xliff file.\n" + e);
-                    }
+                        })
+                    );
+                } catch (e) {
+                    console.log("Skipping invalid translation unit found in xliff file.\n" + e);
                 }
             }
+        }
     }
 
     /**
