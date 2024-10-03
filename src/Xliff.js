@@ -781,6 +781,13 @@ class Xliff {
                 return String(el.text);
             }
 
+            if (el.type === "cdata") {
+                if (el.cdata === undefined) {
+                    return undefined;
+                }
+                return el.cdata;
+            }
+
             if (el.type === "element") {
                 // recurse into child elements
                 const content = el.elements
