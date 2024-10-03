@@ -761,6 +761,31 @@ class Xliff {
     }
 
     /**
+     * Returns text content of an element which may contain content markup (i.e. inline elements)
+     * as defined in [XLIFF 1.2 spec](https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#Struct_InLine).
+     * 
+     * Recursively visits all child elements and concatenates their text content and equiv-text attributes if present.
+     * 
+     * @param {import('ilib-xml-js').Element} contentElement XLIFF content element (e.g. <source> or <target>)
+     * @returns {string}
+     * @private
+     */
+    static getTextContent(contentElement) {
+        /** @type {(el: import('ilib-xml-js').Element) => string} */
+        const visitElement = (el) => {
+            if (el.type === 'text') {
+                return String(el.text ?? '');
+            } else if (el.type === 'element') {
+                const equivText = el.attributes?.['equiv-text'] ?? '';
+                const children = el.elements?.map(visitElement).join('') ?? '';
+                return [ equivText, children ].join('');
+            } else return '';
+        }
+
+        return visitElement(contentElement);
+    }
+
+    /**
      * Parse xliff 1.* files
      * @private
      * 
@@ -790,7 +815,7 @@ class Xliff {
                     const source = getChildren(tu, 'source')?.[0];
                     const target = getChildren(tu, 'target')?.[0];
 
-                    const sourceString = getText(source);
+                    const sourceString = source && Xliff.getTextContent(source);
                     if (!sourceString?.trim()) {
                         // console.log("Found translation unit with an empty or missing source element. File: " + pathName + " Resname: " + resname);
                         continue;

@@ -1615,6 +1615,45 @@ export const testXliff12 = {
         test.done();
     },
 
+    testXliffDeserializeWithXTagInSource: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="fr-FR" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source>Less-than sign (<x id="1" equiv-text="&lt;"/>) is not allowed in XLIFF.</source>\n' +
+                '        <target>Le signe inférieur (&lt;) n\'est pas autorisé dans XLIFF.</target>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Less-than sign (<) is not allowed in XLIFF.");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.equal(tulist[0].target, "Le signe inférieur (<) n\'est pas autorisé dans XLIFF.");
+        test.equal(tulist[0].targetLocale, "fr-FR");
+
+        test.done();
+    },
+
     testXliffDeserializePreserveSourceWhitespace: function(test) {
         test.expect(10);
 
