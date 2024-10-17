@@ -25,6 +25,10 @@ limitations under the License.
 
 ## Release Notes
 
+### v1.2.0
+- added support for parsing inline content markup in XLIFF 1.2 (`<x />` etc.)
+- added support for parsing CDATA content in XLIFF 1.2 (`<![CDATA[<foo />]]>`)
+
 ### v1.1.0
 
 - add support for the "translate" flag on translation units

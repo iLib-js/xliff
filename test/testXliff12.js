@@ -1539,7 +1539,7 @@ export const testXliff12 = {
         test.done();
     },
 
-    testXliffDeserializeWithMultipleMrkTagsInTargetEuro: function(test) {
+    testXliffDeserializeWithMultipleMrkTagsInTarget: function(test) {
         test.expect(12);
 
         const x = new Xliff();
@@ -1608,9 +1608,285 @@ export const testXliff12 = {
         test.equal(tulist[0].project, "webapp");
         test.equal(tulist[0].resType, "string");
         test.equal(tulist[0].id, "2");
-
-        test.equal(tulist[0].target, "This is segment 1.This is segment 2.This is segment 3.");
+        // regardless of the target locale, preserve whitespace between mrk tags if it exists
+        test.equal(tulist[0].target, "This is segment 1. This is segment 2. This is segment 3.");
         test.equal(tulist[0].targetLocale, "zh-Hans-CN");
+
+        test.done();
+    },
+
+    testXliffDeserializePreserveWhitespaceBetweenInlineElementsInSource: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source><g id="1">This is group 1.</g>\n<g id="2">This is group 2.</g> <g id="3">This is group 3.</g></source>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "This is group 1.\nThis is group 2. This is group 3.");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.ok(!tulist[0].target);
+        test.equal(tulist[0].targetLocale, "");
+
+        test.done();
+    },
+
+    testXliffDeserializePreserveWhitespaceBetweenInlineElementsInTarget: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="fr-FR" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source>baby baby</source>\n' +
+                '        <seg-source><mrk mtype="seg" mid="4">baby baby</mrk></seg-source>\n'+
+                '        <target><mrk mtype="seg" mid="4">This is segment 1.</mrk>\n'+
+                '<mrk mtype="seg" mid="5">This is segment 2.</mrk> <mrk mtype="seg" mid="6">This is segment 3.</mrk></target>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "baby baby");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.equal(tulist[0].target, "This is segment 1.\nThis is segment 2. This is segment 3.");
+        test.equal(tulist[0].targetLocale, "fr-FR");
+
+        test.done();
+    },
+
+    testXliffDeserializeWithXTagInSource: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source>Less-than sign (<x id="1" equiv-text="&lt;"/>) is not allowed in XLIFF.</source>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Less-than sign (<) is not allowed in XLIFF.");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.ok(!tulist[0].target);
+        test.equal(tulist[0].targetLocale, "");
+
+        test.done();
+    },
+
+    testXliffDeserializeWithXTagInSourceAndTarget: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="fr-FR" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source>Less-than sign (<x id="1" equiv-text="&lt;"/>) is not allowed in XLIFF.</source>\n' +
+                '        <target>Le signe inférieur (<x id="1" equiv-text="&lt;"/>) n\'est pas autorisé dans XLIFF.</target>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "Less-than sign (<) is not allowed in XLIFF.");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.equal(tulist[0].target, "Le signe inférieur (<) n\'est pas autorisé dans XLIFF.");
+        test.equal(tulist[0].targetLocale, "fr-FR");
+
+        test.done();
+    },
+
+    testXliffDeserializeInlineTagWithContent: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        // example based on https://www.gala-global.org/tmx-14b:
+        // <B>Bold <I>Bold and Italic</B> Italics</I>
+        //
+        // note that non-well-formedness is intentional here (as per the XLIFF spec for <bpt> and <ept> elements)
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source><bpt id="1">&lt;B></bpt>Bold <bpt id="2">&lt;I></bpt>Bold and Italic<ept id="1">&lt;/B></ept> Italics<ept id="2">&lt;/I></ept></source>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "<B>Bold <I>Bold and Italic</B> Italics</I>");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.ok(!tulist[0].target);
+        test.equal(tulist[0].targetLocale, "");
+
+        test.done();
+    },
+
+    testXliffDeserializeInlineTagPreferContentOverEquivText: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        // example based on https://www.gala-global.org/tmx-14b:
+        // The icon <img src="testNode.gif"/> represents a conditional node.
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source>The icon <ph x="1" equiv-text="">&lt;img src="testNode.gif"/></ph> represents a conditional node.</source>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "The icon <img src=\"testNode.gif\"/> represents a conditional node.");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.ok(!tulist[0].target);
+        test.equal(tulist[0].targetLocale, "");
+
+        test.done();
+    },
+
+    testXliffDeserializeWithCdata: function(test) {
+        test.expect(12);
+
+        const x = new Xliff();
+        test.ok(x);
+
+        x.deserialize(
+                '<?xml version="1.0" encoding="utf-8"?>\n' +
+                '<xliff version="1.2">\n' +
+                '  <file original="foo/bar/j.java" source-language="en-US" target-language="" product-name="webapp">\n' +
+                '    <body>\n' +
+                '      <trans-unit id="2" resname="huzzah" restype="string">\n' +
+                '        <source><![CDATA[In CDATA sections, even the less-than sign < is allowed.]]></source>\n' +
+                '      </trans-unit>\n' +
+                '    </body>\n' +
+                '  </file>\n' +
+                '</xliff>');
+
+        let tulist = x.getTranslationUnits();
+
+        test.ok(tulist);
+
+        test.equal(tulist.length, 1);
+
+        test.equal(tulist[0].source, "In CDATA sections, even the less-than sign < is allowed.");
+        test.equal(tulist[0].sourceLocale, "en-US");
+        test.equal(tulist[0].key, "huzzah");
+        test.equal(tulist[0].file, "foo/bar/j.java");
+        test.equal(tulist[0].project, "webapp");
+        test.equal(tulist[0].resType, "string");
+        test.equal(tulist[0].id, "2");
+
+        test.ok(!tulist[0].target);
+        test.equal(tulist[0].targetLocale, "");
 
         test.done();
     },

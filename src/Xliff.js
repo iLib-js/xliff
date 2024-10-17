@@ -20,6 +20,7 @@
 import xmljs from 'ilib-xml-js';
 import Locale from 'ilib-locale';
 import { JSUtils } from 'ilib-common';
+import { getAttribute as getAttr, getText as getText, getChildrenByName as getChildren } from './XmlUtil.js';
 
 import TranslationUnit from './TranslationUnit.js';
 
@@ -760,106 +761,138 @@ class Xliff {
     }
 
     /**
-     * Parse xliff 1.* files
+     * Returns text content of an element which may contain content markup (i.e. inline elements) as defined in [XLIFF
+     * 1.2 spec: 2.4. Inline Elements](https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#Struct_InLine).
+     *
+     * Recursively visits child elements and concatenates their text content. If an element has no text content,
+     * `equiv-text` attribute content is used instead.
+     *
      * @private
+     * @param {import("ilib-xml-js").Element} contentElement XLIFF content element (e.g. <source> or <target>)
+     * @returns {string}
+     */
+    static getTextWithContentMarkup(contentElement) {
+        /** @type {(el: import("ilib-xml-js").Element) => string | undefined} */
+        const visitElement = (el) => {
+            if (el.type === "text") {
+                if (el.text === undefined) {
+                    return undefined;
+                }
+                return String(el.text);
+            }
+
+            if (el.type === "cdata") {
+                if (el.cdata === undefined) {
+                    return undefined;
+                }
+                return el.cdata;
+            }
+
+            if (el.type === "element") {
+                // recurse into child elements
+                const content = el.elements
+                    ?.map(visitElement)
+                    .filter((text) => text !== undefined)
+                    .join("");
+                if (content !== undefined) {
+                    // prefer actual content over equiv-text
+                    return content;
+                }
+
+                const equivText = el.attributes?.["equiv-text"];
+                if (equivText !== undefined) {
+                    // fallback to equiv-text if no content
+                    return String(equivText);
+                }
+            }
+
+            return undefined;
+        };
+
+        return visitElement(contentElement) ?? "";
+    }
+
+    /**
+     * Parse xliff 1.* files
+     *
+     * @private
+     * @param {import("ilib-xml-js").Element} xliff
      */
     parse1(xliff) {
-        if (xliff.file) {
-            const files = makeArray(xliff.file);
-            let comment;
+        const files = getChildren(xliff, "file") ?? [];
+        for (const file of files) {
+            const pathName = getAttr(file, "original");
+            const sourceLocale = getAttr(file, "source-language");
+            const project = getAttr(file, "product-name") || getAttr(file, "original");
+            const targetLocale = getAttr(file, "target-language");
+            const flavor = getAttr(file, "x-flavor");
 
-            for (let i = 0; i < files.length; i++) {
-                let fileSettings = {};
-                let file = files[i];
+            const body = getChildren(file, "body")?.[0];
+            const units = getChildren(body, "trans-unit") ?? [];
+            for (const tu of units) {
+                const id = getAttr(tu, "id");
+                // by convention in this library, translate flag can only be false or undefined (which means true)
+                const translate = ["no", "false"].includes(getAttr(tu, "translate")?.toLowerCase() ?? "")
+                    ? false
+                    : undefined;
+                const context = getAttr(tu, "x-context");
+                const comment = getText(getChildren(tu, "note")?.[0]);
+                const resType = getAttr(tu, "restype");
+                const datatype = getAttr(tu, "datatype");
 
-                fileSettings = {
-                    pathName: file._attributes.original,
-                    locale: file._attributes["source-language"],
-                    project: file._attributes["product-name"] || file._attributes["original"],
-                    targetLocale: file._attributes["target-language"],
-                    flavor: file._attributes["x-flavor"]
-                };
+                const source = getChildren(tu, "source")?.[0];
+                const sourceString = source && Xliff.getTextWithContentMarkup(source);
+                if (!sourceString?.trim()) {
+                    // console.log("Found translation unit with an empty or missing source element. File: " + pathName + " Resname: " + resname);
+                    continue;
+                }
 
-                fileSettings.isAsianLocale = isAsianLocale(fileSettings.targetLocale);
+                const resname = getAttr(tu, "resname") || getAttr(source, "x-key") || sourceString;
 
-                if (file.body && file.body["trans-unit"]) {
-                    const units = makeArray(file.body["trans-unit"]);
+                const target = getChildren(tu, "target")?.[0];
+                const targetString = target && Xliff.getTextWithContentMarkup(target);
 
-                    units.forEach((tu) => {
-                        let translate;
+                const state = getAttr(target, "state");
 
-                        if (tu.source && tu.source["_text"] && tu.source["_text"].trim().length > 0) {
-                            let targetString;
-                            let location;
+                // @ts-expect-error -- position is an untyped ilib-xml-js extension to xml-js Element type
+                const location = this.charPositionToLocation(tu.position);
 
-                            if (tu.target) {
-                                if (tu.target["_text"]) {
-                                    targetString = tu.target["_text"];
-                                } else if (tu.target.mrk) {
-                                    if (Array.isArray(tu.target.mrk)) {
-                                        const targetSegments = tu.target.mrk.map((mrk) => {
-                                            return mrk["_text"];
-                                        })
-                                        targetString = targetSegments.join(fileSettings.isAsianLocale ? '' : ' ');
-                                    } else {
-                                        targetString = tu.target.mrk["_text"];
-                                    }
-                                }
-                            }
+                let ordinal = undefined;
+                if (resType === "array") {
+                    const extype = getAttr(tu, "extype");
+                    ordinal = extype ? Number(extype).valueOf() : undefined;
+                }
 
-                            if (!tu._attributes.resname) {
-                                if (tu.source._attributes && tu.source._attributes["x-key"]) {
-                                    tu.source["_text"] = tu.source._attributes["x-key"];
-                                    tu._attributes.resname = tu.source._attributes["x-key"];
-                                } else {
-                                    tu._attributes.resname = tu.source["_text"];
-                                }
-                            }
-                            if (tu._position) {
-                                location = this.charPositionToLocation(tu._position);
-                            }
+                let quantity = undefined;
+                if (resType === "plural") {
+                    quantity = getAttr(tu, "extype");
+                }
 
-                            if (tu._attributes.translate &&
-                                    (tu._attributes.translate === "no" || tu._attributes.translate === "false")) {
-                                translate = false;
-                            }
-
-                            try {
-                                const unit = new TranslationUnit({
-                                    file: fileSettings.pathName,
-                                    sourceLocale: fileSettings.locale,
-                                    project: fileSettings.project,
-                                    id: tu._attributes.id,
-                                    key: unescapeAttr(tu._attributes.resname),
-                                    source: tu.source["_text"],
-                                    context: tu._attributes["x-context"],
-                                    comment: comment,
-                                    targetLocale: fileSettings.targetLocale,
-                                    comment: tu.note && tu.note["_text"],
-                                    target: targetString,
-                                    resType: tu._attributes.restype,
-                                    state: tu.target && tu.target._attributes && tu.target._attributes.state,
-                                    datatype: tu._attributes.datatype,
-                                    flavor: fileSettings.flavor,
-                                    translate,
-                                    location
-                                });
-                                switch (unit.resType) {
-                                case "array":
-                                    unit.ordinal = tu._attributes.extype && Number(tu._attributes.extype).valueOf();
-                                    break;
-                                case "plural":
-                                    unit.quantity = tu._attributes.extype;
-                                    break;
-                                }
-                                this.tu.push(unit);
-                            } catch (e) {
-                                console.log("Skipping invalid translation unit found in xliff file.\n" + e);
-                            }
-                        } else {
-                            // console.log("Found translation unit with an empty or missing source element. File: " + fileSettings.pathName + " Resname: " + tu._attributes.resname);
-                        }
-                    });
+                try {
+                    this.tu.push(
+                        new TranslationUnit({
+                            file: pathName,
+                            sourceLocale,
+                            project,
+                            id,
+                            key: unescapeAttr(resname),
+                            source: sourceString,
+                            context,
+                            targetLocale,
+                            comment,
+                            target: targetString,
+                            resType,
+                            state,
+                            datatype,
+                            flavor,
+                            translate,
+                            location,
+                            ordinal,
+                            quantity
+                        })
+                    );
+                } catch (e) {
+                    console.log("Skipping invalid translation unit found in xliff file.\n" + e);
                 }
             }
         }
@@ -1059,7 +1092,15 @@ class Xliff {
             }
 
             if (json.xliff._attributes.version.startsWith("1")) {
-                this.parse1(json.xliff);
+                const jsonLarge = /** @type {import('ilib-xml-js').Element} */ (xmljs.xml2js(xml, {
+                    trim: false,
+                    nativeTypeAttribute: true,
+                    compact: false,
+                    position: true,
+                    captureSpacesBetweenElements: true
+                }));
+                const xliffLarge = /** @type {Element} */ (jsonLarge.elements?.find(e => e.type === 'element' && e.name === 'xliff'));
+                this.parse1(xliffLarge);
             } else {
                 this.parse2(json.xliff);
             }
