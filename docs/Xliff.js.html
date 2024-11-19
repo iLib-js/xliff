@@ -1,4 +1,48 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Xliff.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="TranslationUnit.html">TranslationUnit</a><ul class='methods'><li data-type='method'><a href="TranslationUnit.html#clone">clone</a></li></ul></li><li><a href="Xliff.html">Xliff</a><ul class='methods'><li data-type='method'><a href="Xliff.html#addTranslationUnits">addTranslationUnits</a></li><li data-type='method'><a href="Xliff.html#clear">clear</a></li><li data-type='method'><a href="Xliff.html#deserialize">deserialize</a></li><li data-type='method'><a href="Xliff.html#getBytes">getBytes</a></li><li data-type='method'><a href="Xliff.html#getLines">getLines</a></li><li data-type='method'><a href="Xliff.html#getTranslationUnits">getTranslationUnits</a></li><li data-type='method'><a href="Xliff.html#getVersion">getVersion</a></li><li data-type='method'><a href="Xliff.html#serialize">serialize</a></li><li data-type='method'><a href="Xliff.html#size">size</a></li><li data-type='method'><a href="Xliff.html#toString1">toString1</a></li><li data-type='method'><a href="Xliff.html#toString2">toString2</a></li><li data-type='method'><a href="Xliff.html#toStringCustom">toStringCustom</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#getAttribute">getAttribute</a></li><li><a href="global.html#getChildrenByName">getChildrenByName</a></li><li><a href="global.html#getText">getText</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Xliff.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
  * Xliff.js - model an xliff file
  *
  * Copyright © 2016-2017, 2019-2023 HealthTap, Inc. and JEDLSoft
@@ -36,10 +80,10 @@ import TranslationUnit from './TranslationUnit.js';
 function escapeAttr(str) {
     if (!str) return;
     return str.
-        replace(/&/g, "&amp;").
-        replace(/"/g, "&quot;").
-        replace(/'/g, "&apos;").
-        replace(/</g, "&lt;");
+        replace(/&amp;/g, "&amp;amp;").
+        replace(/"/g, "&amp;quot;").
+        replace(/'/g, "&amp;apos;").
+        replace(/&lt;/g, "&amp;lt;");
 }
 
 /**
@@ -51,10 +95,10 @@ function escapeAttr(str) {
 function unescapeAttr(str) {
     if (!str) return;
     return str.
-        replace(/&lt;/g, '<').
-        replace(/&quot;/g, '"').
-        replace(/&apos;/g, "'").
-        replace(/&amp;/g, "&");
+        replace(/&amp;lt;/g, '&lt;').
+        replace(/&amp;quot;/g, '"').
+        replace(/&amp;apos;/g, "'").
+        replace(/&amp;amp;/g, "&amp;");
 }
 
 /**
@@ -143,23 +187,23 @@ class Xliff {
      * which represents a new, clean Xliff instance. The options object may also
      * be an object with any of the following properties:
      *
-     * <ul>
-     * <li><i>tool-id</i> - the id of the tool that saved this xliff file
-     * <li><i>tool-name</i> - the full name of the tool that saved this xliff file
-     * <li><i>tool-version</i> - the version of the tool that save this xliff file
-     * <li><i>tool-company</i> - the name of the company that made this tool
-     * <li><i>copyright</i> - a copyright notice that you would like included into the xliff file
-     * <li><i>sourceLocale</i> - specify the default source locale if a resource doesn't have a locale itself
-     * <li><i>allowDups</i> - allow duplicate resources in the xliff. By default, dups are
+     * &lt;ul>
+     * &lt;li>&lt;i>tool-id&lt;/i> - the id of the tool that saved this xliff file
+     * &lt;li>&lt;i>tool-name&lt;/i> - the full name of the tool that saved this xliff file
+     * &lt;li>&lt;i>tool-version&lt;/i> - the version of the tool that save this xliff file
+     * &lt;li>&lt;i>tool-company&lt;/i> - the name of the company that made this tool
+     * &lt;li>&lt;i>copyright&lt;/i> - a copyright notice that you would like included into the xliff file
+     * &lt;li>&lt;i>sourceLocale&lt;/i> - specify the default source locale if a resource doesn't have a locale itself
+     * &lt;li>&lt;i>allowDups&lt;/i> - allow duplicate resources in the xliff. By default, dups are
      * filtered out. This option allows you to have trans-units that represent instances of the
      * same resource in the file with different metadata. For example, two instances of a
      * resource may have different comments which may both be useful to translators or
      * two instances of the same resource may have been extracted from different source files.
-     * <li><i>version</i> - The version of xliff that will be produced by this instance.
-     * </ul>
+     * &lt;li>&lt;i>version&lt;/i> - The version of xliff that will be produced by this instance.
+     * &lt;/ul>
      *
      * @constructor
-     * @param {Array.<Object>|undefined} options options to
+     * @param {Array.&lt;Object>|undefined} options options to
      * initialize the file, or undefined for a new empty file
      */
     constructor(options) {
@@ -199,7 +243,7 @@ class Xliff {
     /**
      * Get the translation units in this xliff.
      *
-     * @returns {Array.<Object>} the translation units in this xliff
+     * @returns {Array.&lt;Object>} the translation units in this xliff
      */
     getTranslationUnits() {
         return this.tu;
@@ -228,12 +272,12 @@ class Xliff {
         }
 
         oldUnit = this.tuhash[hashKeyTarget];
-        if (oldUnit && !this.allowDups) {
+        if (oldUnit &amp;&amp; !this.allowDups) {
             // console.log("Merging unit");
             // update the old unit with this new info
             JSUtils.shallowCopy(unit, oldUnit);
         } else {
-            if (this.version >= 2 && this.tu.length) {
+            if (this.version >= 2 &amp;&amp; this.tu.length) {
                 if (this.tu[0].targetLocale !== unit.targetLocale) {
                     throw "Mismatched target locale";
                 }
@@ -248,7 +292,7 @@ class Xliff {
     /**
      * Add translation units to this xliff.
      *
-     * @param {Array.<Object>} files the translation units to add to this xliff
+     * @param {Array.&lt;Object>} files the translation units to add to this xliff
      */
     addTranslationUnits(units) {
         units.forEach((unit) => {
@@ -288,7 +332,7 @@ class Xliff {
         let files = {};
         let index = 1;
 
-        for (let i = 0; i < units.length; i++) {
+        for (let i = 0; i &lt; units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
@@ -335,11 +379,11 @@ class Xliff {
 
             // by default, you translate everything, so only put the translate flag
             // when it is false
-            if (typeof(tu.translate) === "boolean" && !tu.translate) {
+            if (typeof(tu.translate) === "boolean" &amp;&amp; !tu.translate) {
                 tujson._attributes.translate = tu.translate;
             }
 
-            if (tu.id && tu.id > index) {
+            if (tu.id &amp;&amp; tu.id > index) {
                 index = tu.id + 1;
             }
 
@@ -383,7 +427,7 @@ class Xliff {
 
         // logger.trace("json is " + JSON.stringify(json, undefined, 4));
 
-        return '<?xml version="1.0" encoding="utf-8"?>\n' + xmljs.js2xml(json, {
+        return '&lt;?xml version="1.0" encoding="utf-8"?>\n' + xmljs.js2xml(json, {
             compact: true,
             spaces: 2
         });
@@ -403,7 +447,7 @@ class Xliff {
         const targetLocale = this.tu[0].targetLocale;
 
         const units = this.tu.filter((unit) => {
-            return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
+            return unit.sourceLocale === sourceLocale &amp;&amp; (!targetLocale || unit.targetLocale === targetLocale);
         });
 
         let json = {
@@ -430,7 +474,7 @@ class Xliff {
         let datatype;
         let groupIndex = 1;
 
-        for (let i = 0; i < units.length; i++) {
+        for (let i = 0; i &lt; units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
@@ -480,7 +524,7 @@ class Xliff {
 
             // by default, you translate everything, so only put the translate flag
             // when it is false
-            if (typeof(tu.translate) === "boolean" && !tu.translate) {
+            if (typeof(tu.translate) === "boolean" &amp;&amp; !tu.translate) {
                 tujson._attributes.translate = tu.translate;
             }
 
@@ -505,7 +549,7 @@ class Xliff {
                 }
             ];
 
-            if (tu.id && tu.id > index) {
+            if (tu.id &amp;&amp; tu.id > index) {
                 index = tu.id + 1;
             }
 
@@ -562,7 +606,7 @@ class Xliff {
             json.xliff.file.push(files[fileHashKey]);
         });
 
-        return '<?xml version="1.0" encoding="utf-8"?>\n' + xmljs.js2xml(json, {
+        return '&lt;?xml version="1.0" encoding="utf-8"?>\n' + xmljs.js2xml(json, {
             compact: true,
             spaces: 2
         });
@@ -578,7 +622,7 @@ class Xliff {
         const targetLocale = this.tu[0].targetLocale;
 
         const units = this.tu.filter((unit) => {
-            return unit.sourceLocale === sourceLocale && (!targetLocale || unit.targetLocale === targetLocale);
+            return unit.sourceLocale === sourceLocale &amp;&amp; (!targetLocale || unit.targetLocale === targetLocale);
         });
 
         let json = {
@@ -606,7 +650,7 @@ class Xliff {
         let datatype;
         let groupIndex = 1;
 
-        for (let i = 0; i < units.length; i++) {
+        for (let i = 0; i &lt; units.length; i++) {
             let tu = units[i];
             if (!tu) {
                 console.log("undefined?");
@@ -640,7 +684,7 @@ class Xliff {
 
             // by default, you translate everything, so only put the translate flag
             // when it is false
-            if (typeof(tu.translate) === "boolean" && !tu.translate) {
+            if (typeof(tu.translate) === "boolean" &amp;&amp; !tu.translate) {
                 tujson._attributes.translate = tu.translate;
             }
 
@@ -665,7 +709,7 @@ class Xliff {
                 }
             ];
 
-            if (tu.id && tu.id > index) {
+            if (tu.id &amp;&amp; tu.id > index) {
                 index = tu.id + 1;
             }
 
@@ -712,7 +756,7 @@ class Xliff {
             json.xliff.file.push(files[fileHashKey]);
         });
 
-        return '<?xml version="1.0" encoding="utf-8"?>\n' + xmljs.js2xml(json, {
+        return '&lt;?xml version="1.0" encoding="utf-8"?>\n' + xmljs.js2xml(json, {
             compact: true,
             spaces: 2
         });
@@ -729,7 +773,7 @@ class Xliff {
      * xml text
      */
     serialize(untranslated) {
-        const xml = ((this.version < 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
+        const xml = ((this.version &lt; 2) ? this.toString1() : (this.style == "custom" ? this.toStringCustom(): this.toString2()));
         this.countLines(xml);
         return xml;
     }
@@ -746,7 +790,7 @@ class Xliff {
 
         while ((right - left) > 1) {
             let middle = Math.trunc((left + right) / 2);
-            if (pos < this.lineIndex[middle]) {
+            if (pos &lt; this.lineIndex[middle]) {
                 right = middle;
             } else if (pos > this.lineIndex[middle]) {
                 left = middle;
@@ -771,7 +815,7 @@ class Xliff {
      * `equiv-text` attribute content is used instead.
      *
      * @private
-     * @param {Element} contentElement XLIFF content element (e.g. <source> or <target>)
+     * @param {Element} contentElement XLIFF content element (e.g. &lt;source> or &lt;target>)
      * @returns {string}
      */
     static getTextWithContentMarkup(contentElement) {
@@ -847,7 +891,7 @@ class Xliff {
                 const datatype = getAttr(tu, "datatype");
 
                 const source = getChildren(tu, "source")?.[0];
-                const sourceString = source && Xliff.getTextWithContentMarkup(source);
+                const sourceString = source &amp;&amp; Xliff.getTextWithContentMarkup(source);
                 if (!sourceString?.trim()) {
                     // console.log("Found translation unit with an empty or missing source element. File: " + pathName + " Resname: " + resname);
                     continue;
@@ -856,7 +900,7 @@ class Xliff {
                 const resname = getAttr(tu, "resname") || getAttr(source, "x-key") || sourceString;
 
                 const target = getChildren(tu, "target")?.[0];
-                const targetString = target && Xliff.getTextWithContentMarkup(target);
+                const targetString = target &amp;&amp; Xliff.getTextWithContentMarkup(target);
 
                 const state = getAttr(target, "state");
 
@@ -915,7 +959,7 @@ class Xliff {
         if (xliff.file) {
             const files = makeArray(xliff.file);
 
-            for (let i = 0; i < files.length; i++) {
+            for (let i = 0; i &lt; files.length; i++) {
                 let fileSettings = {};
                 const file = files[i];
                 let unitsElement = [];
@@ -933,7 +977,7 @@ class Xliff {
                 unitsElement = (typeof (file["group"]) != 'undefined') ? file.group : file;
                 unitsElement = makeArray(unitsElement);
 
-                for (let j = 0; j < unitsElement.length; j++) {
+                for (let j = 0; j &lt; unitsElement.length; j++) {
                     if (unitsElement[j].unit) {
                         const transUnits = makeArray(unitsElement[j].unit);
                         const unitElementName = unitsElement[j]["_attributes"].name;
@@ -942,7 +986,7 @@ class Xliff {
                             const datatype = tu._attributes["l:datatype"] || unitElementName;
                             let source = "", target = "";
 
-                            if (tu.notes && tu.notes.note) {
+                            if (tu.notes &amp;&amp; tu.notes.note) {
                                 comment = Array.isArray(tu.notes.note) ?
                                     tu.notes.note[0]["_text"] :
                                     tu.notes.note["_text"];
@@ -950,7 +994,7 @@ class Xliff {
 
                             let resname = tu._attributes.name;
                             let restype = "string";
-                            if (tu._attributes.type && tu._attributes.type.startsWith("res:")) {
+                            if (tu._attributes.type &amp;&amp; tu._attributes.type.startsWith("res:")) {
                                 restype = tu._attributes.type.substring(4);
                             }
                             if (tu._position) {
@@ -959,7 +1003,7 @@ class Xliff {
 
                             if (tu.segment) {
                                 const segments = makeArray(tu.segment);
-                                for (let j = 0; j < segments.length; j++) {
+                                for (let j = 0; j &lt; segments.length; j++) {
                                     const segment = segments[j];
 
                                     if (segment.source["_text"]) {
@@ -985,7 +1029,7 @@ class Xliff {
                                 }
                             }
 
-                            if (tu._attributes.translate &&
+                            if (tu._attributes.translate &amp;&amp;
                                     (tu._attributes.translate === "no" || tu._attributes.translate === "false")) {
                                 translate = false;
                             }
@@ -1016,7 +1060,7 @@ class Xliff {
                                     });
                                     switch (restype) {
                                     case "array":
-                                        unit.ordinal = tu._attributes["l:index"] && Number(tu._attributes["l:index"]).valueOf();
+                                        unit.ordinal = tu._attributes["l:index"] &amp;&amp; Number(tu._attributes["l:index"]).valueOf();
                                         break;
                                     case "plural":
                                         unit.quantity = tu._attributes["l:category"];
@@ -1092,7 +1136,7 @@ class Xliff {
 
         if (json.xliff) {
             if (!json.xliff._attributes || !json.xliff._attributes.version ||
-                    (!json.xliff._attributes.version.startsWith("1") && !json.xliff._attributes.version.startsWith("2"))) {
+                    (!json.xliff._attributes.version.startsWith("1") &amp;&amp; !json.xliff._attributes.version.startsWith("2"))) {
                 // console.log("Unknown xliff version " + json.xliff._attributes.version + ". Cannot continue parsing.");
                 return;
             }
@@ -1105,7 +1149,7 @@ class Xliff {
                     position: true,
                     captureSpacesBetweenElements: true
                 }));
-                const xliffLarge = /** @type {Element} */ (jsonLarge.elements?.find(e => e.type === 'element' && e.name === 'xliff'));
+                const xliffLarge = /** @type {Element} */ (jsonLarge.elements?.find(e => e.type === 'element' &amp;&amp; e.name === 'xliff'));
                 this.parse1(xliffLarge);
             } else {
                 this.parse2(json.xliff);
@@ -1138,3 +1182,28 @@ class Xliff {
 }
 
 export default Xliff;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Oct 22 2024 17:05:59 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
